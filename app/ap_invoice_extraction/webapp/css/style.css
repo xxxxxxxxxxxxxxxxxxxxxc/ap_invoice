@@ -28,15 +28,35 @@
 }
 
 /* ===================== CHATBOT ===================== */
+.apiChatScroll {
+    background-color: #f7f7f7;
+    padding: 0.75rem 0.75rem 0 0.75rem;
+    box-sizing: border-box;
+}
+
+/* the scroll area is only a container: never draw a focus frame around it */
+.apiChatScroll:focus,
+.apiChatScroll .sapMScrollContScroll:focus {
+    outline: none;
+}
+
+.apiChatItem,
+.apiChatItem.sapMCustomLI {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
 .apiChatBubble {
-    max-width: 18rem;
+    max-width: 15rem;
     padding: 0.5rem 0.75rem;
     border-radius: 0.75rem;
     word-break: break-word;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .apiChatBubbleBot {
-    background-color: #f2f2f2;
+    background-color: #ffffff;
     border-bottom-left-radius: 0.125rem;
 }
 
@@ -49,4 +69,8 @@
     font-size: 0.75rem;
     color: #6a6d70;
     margin-top: 0.125rem;
+}
+
+.apiChatFooter {
+    border-top: 1px solid #e5e5e5;
 }

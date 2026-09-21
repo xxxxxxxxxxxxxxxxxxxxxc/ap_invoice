@@ -1,16 +1,17 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <!-- Lightweight, non-modal chat: anchored to the toolbar icon, the app stays usable -->
+    <!-- Lightweight, non-modal chat: anchored to the toolbar button, the app stays usable -->
     <Popover
         id="chatbotPopover"
         title="{i18n>chatbotTitle}"
         placement="Bottom"
         modal="false"
         resizable="true"
-        contentWidth="20rem"
-        contentHeight="22rem"
-        class="sapUiPopupWithPadding"
+        contentWidth="22rem"
+        contentHeight="24rem"
+        initialFocus="chatbotInput"
+        class="apiChatPopover"
         busy="{chatbot>/busy}"
         busyIndicatorDelay="0">
         <content>
@@ -19,25 +20,22 @@
                 height="100%"
                 width="100%"
                 vertical="true"
-                focusable="true">
+                class="apiChatScroll">
                 <List
                     id="chatbotMessageList"
                     showSeparators="None"
                     showNoData="false"
+                    backgroundDesign="Transparent"
                     items="{chatbot>/messages}">
-                    <CustomListItem id="chatbotMessageItem">
+                    <CustomListItem type="Inactive" class="apiChatItem">
                         <VBox
-                            id="chatbotMessageBox"
                             width="100%"
                             alignItems="{= ${chatbot>author} === 'user' ? 'End' : 'Start' }"
                             class="sapUiTinyMarginBottom">
-                            <VBox
-                                id="chatbotBubble"
-                                class="{= ${chatbot>author} === 'user' ? 'apiChatBubble apiChatBubbleUser' : 'apiChatBubble apiChatBubbleBot' }">
-                                <Text id="chatbotMessageText" text="{chatbot>text}" />
+                            <VBox class="{= ${chatbot>author} === 'user' ? 'apiChatBubble apiChatBubbleUser' : 'apiChatBubble apiChatBubbleBot' }">
+                                <Text text="{chatbot>text}" />
                             </VBox>
                             <Text
-                                id="chatbotMessageTime"
                                 text="{chatbot>time}"
                                 class="apiChatTime" />
                         </VBox>
@@ -46,7 +44,7 @@
             </ScrollContainer>
         </content>
         <footer>
-            <Toolbar id="chatbotFooter">
+            <Toolbar id="chatbotFooter" class="apiChatFooter">
                 <Input
                     id="chatbotInput"
                     width="100%"

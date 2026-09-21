@@ -4,8 +4,9 @@ sap.ui.define([
     "sap/m/library",
     "sap/ui/model/json/JSONModel",
     "sap/ui/core/Fragment",
-    "sap/m/MessageToast"
-], function (Controller, UIComponent, mobileLibrary, JSONModel, Fragment, MessageToast) {
+    "sap/m/MessageToast",
+    "apinvoiceextraction/controller/Chatbot"
+], function (Controller, UIComponent, mobileLibrary, JSONModel, Fragment, MessageToast, Chatbot) {
     "use strict";
 
     // shortcut for sap.m.URLHelper
@@ -102,114 +103,13 @@ sap.ui.define([
         /* ======================= CHATBOT ======================= */
 
         /**
-         * Opens the chatbot as a small non-modal popover anchored to the pressed icon,
-         * so the application behind stays visible and usable.
-         * @param {sap.ui.base.Event} oEvent the press event of the chatbot icon
+         * Opens (or closes) the shared chatbot popover, anchored to the pressed button.
+         * The popover lives on the component root view, so it is created only once and
+         * survives the navigation between Home and Detail.
+         * @param {sap.ui.base.Event} oEvent the press event of the chatbot button
          */
         onOpenChatbot: function (oEvent) {
-            var oView = this.getView();
-            var oSource = oEvent.getSource();
-
-            if (!oView.getModel("chatbot")) {
-                oView.setModel(new JSONModel({
-                    messages: [],
-                    draft: "",
-                    busy: false
-                }), "chatbot");
-            }
-
-            var oPopover = oView.byId("chatbotPopover");
-            if (!oPopover) {
-                Fragment.load({
-                    id: oView.getId(),
-                    name: "apinvoiceextraction.view.ChatbotDialog",
-                    controller: this
-                }).then(function (oLoadedPopover) {
-                    oView.addDependent(oLoadedPopover);
-                    this._greetChatbot();
-                    oLoadedPopover.openBy(oSource);
-                }.bind(this));
-            } else if (oPopover.isOpen()) {
-                oPopover.close();
-            } else {
-                oPopover.openBy(oSource);
-            }
-        },
-
-        /**
-         * Pushes the welcome message the first time the dialog is opened.
-         */
-        _greetChatbot: function () {
-            var oModel = this.getView().getModel("chatbot");
-            if (oModel.getProperty("/messages").length === 0) {
-                this._addChatbotMessage("bot", this.getResourceBundle().getText("chatbotWelcome"));
-            }
-        },
-
-        /**
-         * Appends a message to the conversation and scrolls to the bottom.
-         * @param {string} sAuthor "user" or "bot"
-         * @param {string} sText the message body
-         */
-        _addChatbotMessage: function (sAuthor, sText) {
-            var oModel = this.getView().getModel("chatbot");
-            var aMessages = oModel.getProperty("/messages").slice();
-
-            aMessages.push({
-                author: sAuthor,
-                text: sText,
-                time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-            });
-
-            oModel.setProperty("/messages", aMessages);
-            this._scrollChatbotToBottom();
-        },
-
-        _scrollChatbotToBottom: function () {
-            var oScroll = this.getView().byId("chatbotScroll");
-            if (!oScroll) {
-                return;
-            }
-            setTimeout(function () {
-                var oDom = oScroll.getDomRef();
-                if (oDom) {
-                    oScroll.scrollTo(0, oDom.scrollHeight, 0);
-                }
-            }, 0);
-        },
-
-        /**
-         * Sends the typed message to the CAP action "chatbotMessage"
-         * and displays the reply returned by the backend.
-         */
-        onChatbotSend: async function () {
-            var oModel = this.getView().getModel("chatbot");
-            var sText = (oModel.getProperty("/draft") || "").trim();
-
-            if (!sText) {
-                return;
-            }
-
-            this._addChatbotMessage("user", sText);
-            oModel.setProperty("/draft", "");
-            oModel.setProperty("/busy", true);
-
-            try {
-                var oODataModel = this.getOwnerComponent().getModel();
-                var oOperation = oODataModel.bindContext("/chatbotMessage(...)");
-                oOperation.setParameter("message", sText);
-
-                await oOperation.execute();
-
-                var oResult = oOperation.getBoundContext().getObject() || {};
-                this._addChatbotMessage("bot", oResult.reply || this.getResourceBundle().getText("chatbotError"));
-            } catch (err) {
-                console.error("Chatbot call failed", err);
-                this._addChatbotMessage("bot", this.getResourceBundle().getText("chatbotError"));
-                MessageToast.show(this.getResourceBundle().getText("chatbotError"));
-            } finally {
-                oModel.setProperty("/busy", false);
-            }
+            Chatbot.toggle(this.getOwnerComponent(), oEvent.getSource());
         },
 
         /**

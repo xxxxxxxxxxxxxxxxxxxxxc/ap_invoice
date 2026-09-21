@@ -22,7 +22,8 @@
                 <f:actions>
                     <Button
                         id="btnChatbot"
-                        icon="sap-icon://discussion-2"
+                        icon="sap-icon://ai"
+                        text="{i18n>chatbotButton}"
                         tooltip="{i18n>chatbotTooltip}"
                         press="onOpenChatbot"
                     />
