@@ -1,0 +1,1 @@
+{"version":3,"file":"formatter.js","names":["sap","ui","define","formatEmail","sEmail","toLowerCase"],"sources":["formatter-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAEA,MAAO,CACHC,YAAa,SAAUC,GACnB,OAAOA,EAASA,EAAOC,cAAgB,EAC3C,EAER","ignoreList":[]}

@@ -1,4 +1,4 @@
-using {db} from '../db/schema.cds';
+using {db} from '../db/schema';
 
 @path: '/service/CatalogService'
 service CatalogService {

@@ -70,7 +70,7 @@ modules:
       - name: AP_Invoice-service-metadata
       - name: AP_Invoice-service-connectivity
       - name: AP_Invoice-service-logs
-      - name: AP_Invoice-service-autoscaler
+  
         parameters:
           config:
             instance_min_count: 1
@@ -88,13 +88,19 @@ modules:
     provides:
       - name: srv-api
         properties:
-          srv-url: 'https://apinvoice-srv.${app-domain}'
+          srv-url: '${default-url}'
+    properties:
+      # SAP AI Core (Generative AI Hub) connection.
+      # AI_CORE_DESTINATION      -> BTP subaccount destination pointing to the AI API
+      # AI_CORE_RESOURCE_GROUP   -> workspace inside the AI API connection (see SAP AI Launchpad)
+      AI_CORE_DESTINATION: AI_Core
+      AI_CORE_RESOURCE_GROUP: default
     parameters:
       memory: 1024MB
       disk-quota: 4096MB
-      app-domain: 'cf.prysmian.com'
+    
       routes:
-        - route: 'apinvoice-srv.${app-domain}'
+        - route: '${default-url}'
     build-parameters:
       builder: npm
       ignore:
@@ -184,16 +190,14 @@ resources:
   - name: AP_Invoice-service-uaa
     type: org.cloudfoundry.managed-service
     parameters:
-      app-domain: 'cf.prysmian.com'
+    
       config:
         oauth2-configuration:
           credential-types:
             - binding-secret
             - x509
-          redirect-uris:
-            - https://${subdomain}.launchpad.${default-domain}/login/*
-            - https://${subdomain}.${default-domain}/login/*
-            - https://*.${app-domain}/**
+   
+         
         role-collections: []
         xsappname: AP_Invoice-${space}
       path: xs-security.json
@@ -227,8 +231,7 @@ resources:
   - name: AP_Invoice-service-metadata
     type: org.cloudfoundry.user-provided-service
     parameters:
-      config:
-        default-domain: ${default-domain}
+   
       service: metadata
       service-name: AP_Invoice-metadata
       service-plan: standard
@@ -250,15 +253,11 @@ resources:
       service: html5-apps-repo
       service-name: AP_Invoice-html5-apps-repo-host
       service-plan: app-host
-  - name: AP_Invoice-service-autoscaler
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: autoscaler
-      service-plan: standard
+
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
-  subdomain: ide-transport-8v6izcd6
+
 build-parameters:
   before-all:
     - builder: custom

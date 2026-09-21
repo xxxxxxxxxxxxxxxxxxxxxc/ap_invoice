@@ -1,4 +1,5 @@
 const { AzureOpenAiChatClient, OrchestrationClient } = require("@sap-ai-sdk/langchain");
+const { getAICoreConfig } = require("./AICoreConfig");
 const { StateGraph, START, END, MemorySaver } = require("@langchain/langgraph");
 const { ToolNode } = require("@langchain/langgraph/prebuilt");
 const { HumanMessage, SystemMessage } = require("@langchain/core/messages");
@@ -11,6 +12,25 @@ const agentState = {
         default: () => [],
     },
 };
+
+/**
+ * True when the error (or any error in its `cause` chain) is the SAP AI SDK failing
+ * to resolve a RUNNING deployment. LangGraph/LangChain wrap errors, so the original
+ * message is often not the top-level one.
+ */
+function isDeploymentResolutionError(err) {
+    const pattern = /No deployment matched|Failed to fetch the list of deployments/i;
+    let current = err;
+    const seen = new Set();
+    while (current && !seen.has(current)) {
+        seen.add(current);
+        if (pattern.test(current.message || '')) {
+            return true;
+        }
+        current = current.cause;
+    }
+    return false;
+}
 
 class AICoreService {
     constructor() { }
@@ -25,18 +45,26 @@ class AICoreService {
      * @returns {Promise<object>} Extracted JSON data
      */
     async extractDataLikeAgent(documentContent, tools, schemaDescription, context = {}) {
-        const destinationName = "AI_Core";
-        const deploymentId = process.env.AI_CORE_DEPLOYMENT_ID; // Optional if using generic client or handled by SDK
-        const resourceGroup = "ap-invoice";
+        // Connection to SAP AI Core: BTP destination + Gen AI Hub resource group.
+        // Both are configurable (env vars / package.json `cds.aicore`) and default
+        // to the destination "AI_Core" and the resource group "default".
+        const aiCore = getAICoreConfig();
+        const destinationName = aiCore.destination;
+        const resourceGroup = aiCore.resourceGroup;
+        const modelName = context.aiModel || aiCore.model;
+        const temperature = context.aiTemperature !== undefined && context.aiTemperature !== null && context.aiTemperature !== ''
+            ? parseFloat(context.aiTemperature)
+            : aiCore.temperature;
 
+        console.log(`[AICore] Destination: '${destinationName}' | Resource Group: '${resourceGroup}' | Model: '${modelName}' | Temperature: ${temperature}`);
 
         // Create a model
         const model = new OrchestrationClient({
             promptTemplating: {},
             llm: {
-                model_name: context.aiModel || 'gemini-2.5-pro',
+                model_name: modelName,
                 model_params: {
-                    temperature: context.aiTemperature !== undefined ? parseFloat(context.aiTemperature) : 0.0
+                    temperature: temperature
                 }
             }
         }, 
@@ -174,77 +202,95 @@ class AICoreService {
         });
 
         // 5. Invoke Graph
-        const finalState = await app.invoke({ messages: inputMessages }, {
-            recursionLimit: 200, // Increased from default 25 to 100
-            configurable: { thread_id: "invoice_extraction_" + Date.now() },
-            callbacks: [{
-                handleLLMStart: async (llm, prompts) => {
-                    logCollector.push({
-                        type: "LLMStart",
-                        timestamp: new Date(),
-                        message: "Thinking...",
-                        data: { promptCount: prompts.length }
-                    });
-                    console.log(`[AICore] LLM Started. Prompts: ${prompts.length}. (Step count internal limit: 100)`);
-                },
-                handleLLMEnd: async (output) => {
-                    const text = output.generations[0][0].text;
-                    const messageUsage = output.generations[0][0].message?.usage_metadata;
-                    if (messageUsage) {
-                        totalInputTokens += (messageUsage.input_tokens || 0);
-                        totalOutputTokens += (messageUsage.output_tokens || 0);
-                    } else if (output.llmOutput?.tokenUsage) {
-                        totalInputTokens += (output.llmOutput.tokenUsage.promptTokens || 0);
-                        totalOutputTokens += (output.llmOutput.tokenUsage.completionTokens || 0);
-                    }
-                    logCollector.push({
-                        type: "LLMEnd",
-                        timestamp: new Date(),
-                        message: "Thought generated",
-                        data: { text: text }
-                    });
-                    console.log("[AICore] LLM Response:", text.substring(0, 200) + (text.length > 200 ? "..." : ""));
-                },
-                handleToolStart: async (tool, input, runId, parentRunId, tags, metadata, runName) => {
-                    const toolName = runName
-                        || (Array.isArray(tool?.id) ? tool.id[tool.id.length - 1] : null)
-                        || tool?.name
-                        || "Unknown Tool";
+        let finalState;
+        try {
+            finalState = await app.invoke({ messages: inputMessages }, {
+                recursionLimit: 200, // Increased from default 25 to 100
+                configurable: { thread_id: "invoice_extraction_" + Date.now() },
+                callbacks: [{
+                    handleLLMStart: async (llm, prompts) => {
+                        logCollector.push({
+                            type: "LLMStart",
+                            timestamp: new Date(),
+                            message: "Thinking...",
+                            data: { promptCount: prompts.length }
+                        });
+                        console.log(`[AICore] LLM Started. Prompts: ${prompts.length}. (Step count internal limit: 100)`);
+                    },
+                    handleLLMEnd: async (output) => {
+                        const text = output.generations[0][0].text;
+                        const messageUsage = output.generations[0][0].message?.usage_metadata;
+                        if (messageUsage) {
+                            totalInputTokens += (messageUsage.input_tokens || 0);
+                            totalOutputTokens += (messageUsage.output_tokens || 0);
+                        } else if (output.llmOutput?.tokenUsage) {
+                            totalInputTokens += (output.llmOutput.tokenUsage.promptTokens || 0);
+                            totalOutputTokens += (output.llmOutput.tokenUsage.completionTokens || 0);
+                        }
+                        logCollector.push({
+                            type: "LLMEnd",
+                            timestamp: new Date(),
+                            message: "Thought generated",
+                            data: { text: text }
+                        });
+                        console.log("[AICore] LLM Response:", text.substring(0, 200) + (text.length > 200 ? "..." : ""));
+                    },
+                    handleToolStart: async (tool, input, runId, parentRunId, tags, metadata, runName) => {
+                        const toolName = runName
+                            || (Array.isArray(tool?.id) ? tool.id[tool.id.length - 1] : null)
+                            || tool?.name
+                            || "Unknown Tool";
 
-                    logCollector.push({
-                        type: "ToolStart",
-                        timestamp: new Date(),
-                        toolName: toolName,
-                        input: input
-                    });
-                    console.log(`[AICore] Tool '${toolName}' started. Input:`, input);
-                },
-                handleToolEnd: async (output) => {
-                    logCollector.push({
-                        type: "ToolEnd",
-                        timestamp: new Date(),
-                        output: output
-                    });
-                    console.log(`[AICore] Tool ended. Output:`, String(output).substring(0, 200) + "...");
-                },
-                handleToolError: async (err) => {
-                    logCollector.push({
-                        type: "ToolError",
-                        timestamp: new Date(),
-                        error: err.message
-                    });
-                    console.error(`[AICore] Tool Error:`, err);
-                },
-                handleChainError: async (err) => {
-                    logCollector.push({
-                        type: "ChainError",
-                        timestamp: new Date(),
-                        error: err.message
-                    });
-                    console.error(`[AICore] Chain Error:`, err);
-                }
-            }]
-        });
+                        logCollector.push({
+                            type: "ToolStart",
+                            timestamp: new Date(),
+                            toolName: toolName,
+                            input: input
+                        });
+                        console.log(`[AICore] Tool '${toolName}' started. Input:`, input);
+                    },
+                    handleToolEnd: async (output) => {
+                        logCollector.push({
+                            type: "ToolEnd",
+                            timestamp: new Date(),
+                            output: output
+                        });
+                        console.log(`[AICore] Tool ended. Output:`, String(output).substring(0, 200) + "...");
+                    },
+                    handleToolError: async (err) => {
+                        logCollector.push({
+                            type: "ToolError",
+                            timestamp: new Date(),
+                            error: err.message
+                        });
+                        console.error(`[AICore] Tool Error:`, err);
+                    },
+                    handleChainError: async (err) => {
+                        logCollector.push({
+                            type: "ChainError",
+                            timestamp: new Date(),
+                            error: err.message
+                        });
+                        console.error(`[AICore] Chain Error:`, err);
+                    }
+                }]
+            });
+        } catch (err) {
+            // The orchestration client resolves its deployment by querying AI Core for a
+            // RUNNING deployment of the 'orchestration' scenario inside the resource group.
+            // A configuration alone is not enough: it has to be deployed.
+            if (isDeploymentResolutionError(err)) {
+                const hint = `[AICore] No RUNNING 'orchestration' deployment reachable via destination '${destinationName}' in resource group '${resourceGroup}'. `
+                    + `In SAP AI Launchpad check ML Operations > Deployments: a deployment of the 'orchestration' scenario must exist and be in status RUNNING `
+                    + `(creating the configuration alone is not sufficient).`;
+                console.error(hint, err);
+                const wrapped = new Error(`${hint} Original error: ${err.message}`);
+                wrapped.cause = err;
+                throw wrapped;
+            }
+            console.error(`[AICore] Agent execution failed (destination '${destinationName}', resource group '${resourceGroup}', model '${modelName}'):`, err);
+            throw err;
+        }
 
         // 6. Extract Final Output
         const finalMessage = finalState.messages[finalState.messages.length - 1];

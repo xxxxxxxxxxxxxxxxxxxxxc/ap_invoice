@@ -1,5 +1,0 @@
-{
-  "ProjectOverviewURL": "https://documentai-test.launchpad.cfapps.eu20.hana.ondemand.com/lcapAP_Invoice.AP_InvoiceLaunchpad-1.0.0",
-  "DeployedUTCTime": "2026-02-20T14:00:58.797Z",
-  "ApplicationLogURL": "https://logs.cf.eu20-001.hana.ondemand.com/app/dashboards#/view/Overview?_g=(filters:!((query:(match_phrase:(component_name:AP_Invoice-srv)))))"
-}
