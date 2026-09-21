@@ -32,9 +32,19 @@
                             width="100%"
                             alignItems="{= ${chatbot>author} === 'user' ? 'End' : 'Start' }"
                             class="sapUiTinyMarginBottom">
-                            <VBox class="{= ${chatbot>author} === 'user' ? 'apiChatBubble apiChatBubbleUser' : 'apiChatBubble apiChatBubbleBot' }">
-                                <Text text="{chatbot>text}" />
-                            </VBox>
+                            <HBox
+                                alignItems="End"
+                                direction="{= ${chatbot>author} === 'user' ? 'RowReverse' : 'Row' }">
+                                <Avatar
+                                    src="{= ${chatbot>author} === 'user' ? 'sap-icon://person-placeholder' : 'sap-icon://ai' }"
+                                    displaySize="XS"
+                                    displayShape="Circle"
+                                    backgroundColor="{= ${chatbot>author} === 'user' ? 'Accent6' : 'Accent10' }"
+                                    class="apiChatAvatar" />
+                                <VBox class="{= ${chatbot>author} === 'user' ? 'apiChatBubble apiChatBubbleUser' : 'apiChatBubble apiChatBubbleBot' }">
+                                    <Text text="{chatbot>text}" />
+                                </VBox>
+                            </HBox>
                             <Text
                                 text="{chatbot>time}"
                                 class="apiChatTime" />
