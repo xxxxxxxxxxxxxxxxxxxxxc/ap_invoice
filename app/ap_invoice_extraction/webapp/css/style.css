@@ -26,3 +26,27 @@
   background-color: #ffffcc !important; /* Light Yellow */
   border-color: #ffd700 !important; /* Gold/Yellow Border */
 }
+
+/* ===================== CHATBOT ===================== */
+.apiChatBubble {
+    max-width: 18rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    word-break: break-word;
+}
+
+.apiChatBubbleBot {
+    background-color: #f2f2f2;
+    border-bottom-left-radius: 0.125rem;
+}
+
+.apiChatBubbleUser {
+    background-color: #d9edf9;
+    border-bottom-right-radius: 0.125rem;
+}
+
+.apiChatTime {
+    font-size: 0.75rem;
+    color: #6a6d70;
+    margin-top: 0.125rem;
+}

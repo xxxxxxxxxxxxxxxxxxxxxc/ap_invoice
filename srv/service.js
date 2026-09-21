@@ -9,6 +9,7 @@ const PayloadHandler = require('./handlers/PayloadHandler');
 const SearchHelpHandler = require('./handlers/SearchHelpHandler');
 const XmlHandler = require('./handlers/XmlHandler');
 const ZipHandler = require('./handlers/ZipHandler');
+const ChatbotHandler = require('./handlers/ChatbotHandler');
 
 module.exports = cds.service.impl(async function (srv) {
   let gtwService, mailService;
@@ -172,6 +173,12 @@ module.exports = cds.service.impl(async function (srv) {
 
   this.on("executeSearchHelp", async (req) => {
        return await SearchHelpHandler.executeSearchHelp(req, this.entities);
+  });
+
+  // --- CHATBOT HANDLER ---
+
+  this.on("chatbotMessage", async (req) => {
+       return await ChatbotHandler.chatbotMessage(req);
   });
 
   this.on("getUserAllowedCountries", async (req) => {

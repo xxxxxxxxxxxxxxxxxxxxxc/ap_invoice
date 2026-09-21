@@ -1,0 +1,65 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <!-- Lightweight, non-modal chat: anchored to the toolbar icon, the app stays usable -->
+    <Popover
+        id="chatbotPopover"
+        title="{i18n>chatbotTitle}"
+        placement="Bottom"
+        modal="false"
+        resizable="true"
+        contentWidth="20rem"
+        contentHeight="22rem"
+        class="sapUiPopupWithPadding"
+        busy="{chatbot>/busy}"
+        busyIndicatorDelay="0">
+        <content>
+            <ScrollContainer
+                id="chatbotScroll"
+                height="100%"
+                width="100%"
+                vertical="true"
+                focusable="true">
+                <List
+                    id="chatbotMessageList"
+                    showSeparators="None"
+                    showNoData="false"
+                    items="{chatbot>/messages}">
+                    <CustomListItem id="chatbotMessageItem">
+                        <VBox
+                            id="chatbotMessageBox"
+                            width="100%"
+                            alignItems="{= ${chatbot>author} === 'user' ? 'End' : 'Start' }"
+                            class="sapUiTinyMarginBottom">
+                            <VBox
+                                id="chatbotBubble"
+                                class="{= ${chatbot>author} === 'user' ? 'apiChatBubble apiChatBubbleUser' : 'apiChatBubble apiChatBubbleBot' }">
+                                <Text id="chatbotMessageText" text="{chatbot>text}" />
+                            </VBox>
+                            <Text
+                                id="chatbotMessageTime"
+                                text="{chatbot>time}"
+                                class="apiChatTime" />
+                        </VBox>
+                    </CustomListItem>
+                </List>
+            </ScrollContainer>
+        </content>
+        <footer>
+            <Toolbar id="chatbotFooter">
+                <Input
+                    id="chatbotInput"
+                    width="100%"
+                    placeholder="{i18n>chatbotPlaceholder}"
+                    value="{chatbot>/draft}"
+                    submit="onChatbotSend" />
+                <Button
+                    id="chatbotSendButton"
+                    icon="sap-icon://paper-plane"
+                    type="Transparent"
+                    tooltip="{i18n>chatbotSend}"
+                    press="onChatbotSend" />
+            </Toolbar>
+        </footer>
+    </Popover>
+</core:FragmentDefinition>

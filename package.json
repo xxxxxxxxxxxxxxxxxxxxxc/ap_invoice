@@ -76,6 +76,7 @@
     "start-local": "npm run generate-entry-point && npm run cds-watch",
     "generate-entry-point": "dev-cap-tools gen-entrypoint",
     "cds-watch": "cds watch --open",
+    "watch-hybrid": "cds watch --profile hybrid",
     "watch-configcountry": "cds watch --open configcountry/index.html?sap-ui-xx-viewCache=false --livereload false",
     "watch-usercountries": "cds watch --open usercountries/index.html?sap-ui-xx-viewCache=false --livereload false",
     "undeploy": "cf undeploy AP_Invoice --delete-services --delete-service-keys --delete-service-brokers",
@@ -112,13 +113,34 @@
           "requestTimeout": "300000"
         }
       },
+      "[hybrid]": {
+        "db": "hana"
+      },
       "[production]": {
         "db": "hana",
         "auth": "xsuaa"
       },
       "auth": {
         "[development]": {
-          "kind": "dummy"
+          "kind": "mocked",
+          "users": {
+            "giuseppe.devito@mashfrog.com": {
+              "password": "welcome",
+              "id": "giuseppe.devito@mashfrog.com",
+              "email": "giuseppe.devito@mashfrog.com",
+              "userAttributes": {
+                "email": "giuseppe.devito@mashfrog.com"
+              }
+            },
+            "giuseppe.devito@mashgrof.com": {
+              "password": "welcome",
+              "id": "giuseppe.devito@mashgrof.com",
+              "email": "giuseppe.devito@mashgrof.com",
+              "userAttributes": {
+                "email": "giuseppe.devito@mashgrof.com"
+              }
+            }
+          }
         },
         "[production]": {
           "kind": "xsuaa"

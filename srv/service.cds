@@ -2,6 +2,11 @@ using {db} from '../db/schema';
 
 @path: '/service/CatalogService'
 service CatalogService {
+    type ChatbotReply {
+        reply     : String;
+        timestamp : String;
+    }
+
     type JobsResult {
         status       : String;
         id           : String;
@@ -246,6 +251,9 @@ service CatalogService {
 
     // Action to execute Search Help dynamically
     action   executeSearchHelp(functionId: String, filters: LargeString)                                                                                      returns LargeString;
+
+    // Chatbot: sends a user message and returns the assistant reply
+    action   chatbotMessage(message: String)                                                                                                                  returns ChatbotReply;
 }
 
 annotate CatalogService with @requires: ['authenticated-user'];

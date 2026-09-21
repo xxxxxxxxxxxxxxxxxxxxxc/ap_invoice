@@ -21,6 +21,12 @@
                 </f:heading>
                 <f:actions>
                     <Button
+                        id="btnChatbot"
+                        icon="sap-icon://discussion-2"
+                        tooltip="{i18n>chatbotTooltip}"
+                        press="onOpenChatbot"
+                    />
+                    <Button
                         id="btnCountrySelect"
                         icon="sap-icon://world"
                         tooltip="{i18n>selectCountry}"

@@ -9,6 +9,7 @@
         title="{i18n>detailTitle}">
         
         <headerContent>
+            <Button id="btnChatbotDetail" icon="sap-icon://discussion-2" tooltip="{i18n>chatbotTooltip}" press="onOpenChatbot"/>
             <Button id="btnShowErrors" text="{i18n>showErrors}" press="onShowErrors" type="Reject" enabled="{path: 'registrationStatus', formatter: '.formatErrorEnabled'}"/>
             <Button id="btnSaveDraft" text="{i18n>saveDraft}" press="onSaveDraft" type="Emphasized" enabled="{detailView>/isEditable}"/>
             <Button id="btnSimulate" text="{i18n>simulate}" press="onSimulate" type="Default" icon="" enabled="{detailView>/isEditable}"/>
