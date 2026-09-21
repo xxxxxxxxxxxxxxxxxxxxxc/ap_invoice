@@ -1,0 +1,119 @@
+<mvc:View
+    controllerName="apinvoiceextraction.controller.Detail"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+    <Page
+        id="detailPage"
+        title="{i18n>detailTitle}">
+        
+        <headerContent>
+            <Button id="btnShowErrors" text="{i18n>showErrors}" press="onShowErrors" type="Reject" enabled="{path: 'registrationStatus', formatter: '.formatErrorEnabled'}"/>
+            <Button id="btnSaveDraft" text="{i18n>saveDraft}" press="onSaveDraft" type="Emphasized" enabled="{detailView>/isEditable}"/>
+            <Button id="btnSimulate" text="{i18n>simulate}" press="onSimulate" type="Default" icon="" enabled="{detailView>/isEditable}"/>
+            <Button id="btnRegister" text="{i18n>register}" press="onRegister" type="Accept" enabled="{detailView>/isEditable}"/>
+        </headerContent>
+
+        <content>
+            <!-- Header Section (Collapsible) -->
+            <Panel id="headerPanel" expandable="true" expanded="true" headerText="{i18n>documentDetails}" width="auto" class="sapUiResponsiveMargin">
+                <content>
+                    <ObjectHeader
+                        id="objectHeader"
+                        title="{fileName}"
+                        number="{invoiceNumber}"
+                        intro="{fornitore}"
+                        responsive="true"
+                        fullScreenOptimized="true">
+                        <attributes>
+                            <ObjectAttribute id="attrStatus" title="{i18n>status}" text="{status}"/>
+
+                            <ObjectAttribute id="attrCompanyCode" title="{i18n>companyCode}" text="{companyCode}"/>
+                            <ObjectAttribute id="attrCreationDate" title="{i18n>creationDate}" text="{path: 'createdAt', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}"/>
+
+                            <ObjectAttribute id="attrInputTokens" title="{i18n>lbl_inputTokens}" text="{inputTokens}" visible="{= ${inputTokens} > 0 }"/>
+                            <ObjectAttribute id="attrOutputTokens" title="{i18n>lbl_outputTokens}" text="{outputTokens}" visible="{= ${outputTokens} > 0 }"/>
+                        </attributes>
+                    </ObjectHeader>
+
+                </content>
+            </Panel>
+
+            <l:Splitter id="mainSplitter" height="100%" width="100%" xmlns:l="sap.ui.layout">
+                <l:contentAreas>
+                    <!-- LEFT PANE: PDF VIEWER -->
+                    <!-- LEFT PANE: PDF VIEWER (Custom pdf.js) -->
+                    <Panel id="pdfViewerPanel" headerText="{i18n>documentTitle}" height="100%" visible="{= !${detailView>/isXml} || ${detailView>/hasPdf} }">
+                         <layoutData>
+                            <l:SplitterLayoutData id="pdfSplitterLayout" size="40%" resizable="true"/>
+                        </layoutData>
+                        <FlexBox id="pdfFlexBox" direction="Column" renderType="Div" class="sapUiSmallMargin" height="100%">
+                            <VBox id="iframeContainer2" width="100%" height="100%" xmlns="sap.m"/>
+                        </FlexBox>
+                    </Panel>
+
+                    <!-- RIGHT PANE: FIELDS -->
+                    <!-- LEGEND TOOLBAR -->
+                    <Panel height="100%">
+                    <OverflowToolbar id="legendToolbar">
+                        <HBox width="100%" align="Center" justifyContent="SpaceBetween">
+                            <HBox align="Center" alignItems="Center">
+
+                                
+                                <Label text="{i18n>scenarioLabel}" design="Bold" class="sapUiTinyMarginEnd"/>
+                                <Select id="scenarioSelect" selectedKey="{detailView>/currentScenario}" change=".onManualScenarioChange" enabled="{detailView>/isEditable}">
+                                    <core:Item key="FI" text="{i18n>scenarioFI}" />
+                                    <core:Item key="MM" text="{i18n>scenarioMM}" />
+                                </Select>
+                            </HBox>
+                            <HBox align="End">
+                                <Button text="{i18n>rerunConversions}" press="onRerunConversions" type="Default" icon="sap-icon://refresh" enabled="{detailView>/isEditable}"/>
+                                <Button text="{i18n>showExecutionHistory}" press="onShowExecutionHistory" type="Ghost" icon="sap-icon://history" visible="{= (!!${extractedData} &amp;&amp; !${detailView>/isXml}) || ${detailView>/hasPdf} }"/>
+                            </HBox>
+                        </HBox>
+                    </OverflowToolbar>
+
+                    <MessageStrip
+                        id="fieldsToControlLegend"
+                        text="{i18n>fieldsToControlLegend}"
+                        type="Warning"
+                        showIcon="true"
+                        showCloseButton="false"
+                        class="sapUiSmallMarginBottom"/>
+
+                    <IconTabBar id="iconTabBar" class="sapUiResponsiveContentPadding">
+                         <layoutData>
+                            <l:SplitterLayoutData id="iconTabBarLayoutData" size="auto" resizable="true"/>
+                        </layoutData>
+                        <items>
+                            <IconTabFilter key="general" text="{i18n>generalInfo}">
+                                <!-- Dynamic Header Fields Container -->
+                                <f:SimpleForm id="headerForm"
+                                    editable="true"
+                                    layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+                                    adjustLabelSpan="false"
+                                    emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0"
+                                    columnsXL="1" columnsL="1" columnsM="1"
+                                    singleContainerFullSize="false">
+                                    <!-- Content will be added dynamically by Controller -->
+                                </f:SimpleForm>
+                            </IconTabFilter>
+                            <IconTabFilter key="items" text="{i18n>lineItems}" visible="{= !${detailView>/isXml} || ${detailView>/hasPdf} }">
+                                <Toolbar id="lineItemsToolbar">
+                                    <Title text="{i18n>lineItems}"/>
+                                    <ToolbarSpacer/>
+                                    <Button icon="sap-icon://add" press="onAddLineItem" enabled="{detailView>/isEditable}"/>
+                                    <Button id="aggregateButton" text="{i18n>aggregateLineItems}" icon="sap-icon://combine" press="onAggregateLineItems" enabled="{detailView>/isAggregateEnabled}"/>
+                                </Toolbar>
+                                <VBox id="lineItemsContainer" width="100%" />
+                            </IconTabFilter>
+                        </items>
+                    </IconTabBar>
+                    </Panel>
+                </l:contentAreas>
+            </l:Splitter>
+        </content>
+    </Page>
+</mvc:View>

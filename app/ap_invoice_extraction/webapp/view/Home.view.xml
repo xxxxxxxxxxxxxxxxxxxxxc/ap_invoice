@@ -1,0 +1,150 @@
+<mvc:View controllerName="apinvoiceextraction.controller.Home"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:mdc="sap.ui.mdc"
+    xmlns:mdctable="sap.ui.mdc.table"
+    xmlns:unified="sap.ui.unified">
+    <f:DynamicPage
+        id="dynamicPage"
+        headerExpanded="true"
+    >
+        <!-- HEADER -->
+        <f:title>
+            <f:DynamicPageTitle id="dynamicPageTitle">
+                <f:heading>
+                    <Title
+                        id="appTitle"
+                        text="{i18n>appTitleShort} - {appView>/selectedCountryName}"
+                    />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        id="btnCountrySelect"
+                        icon="sap-icon://world"
+                        tooltip="{i18n>selectCountry}"
+                        press="openCountrySelectionDialog"
+                    />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <!-- CONTENT -->
+        <f:content>
+            <VBox
+                id="mainVBox"
+                height="100%"
+                fitContainer="true"
+            >
+                <!-- 🛡️ STANDARD UI5 TABLE (NO MDC) -->
+                <Table
+                    id="DocumentTable"
+                    width="100%"
+                    items="{
+                        path: '/DocumentStatusBtp',
+                        parameters: {
+                            $count: true,
+                            $$updateGroupId: '$auto'
+                        },
+                        sorter: {
+                            path: 'createdAt',
+                            descending: true
+                        }
+                    }"
+                    growing="true"
+                    growingThreshold="20"
+                    mode="MultiSelect"
+                    itemPress=".onListItemPress"
+                >
+                    <headerToolbar>
+                        <OverflowToolbar id="tableToolbar">
+                            <SearchField
+                                id="searchField"
+                                width="auto"
+                                placeholder="{i18n>fileName}"
+                                search=".onSearch"
+                            />
+                            
+                            <ToolbarSpacer id="toolbarSpacer" />
+
+                            <Button
+                                id="btnUploadDialog"
+                                text="{i18n>uploadButtonText}"
+                                icon="sap-icon://upload"
+                                press="onOpenUploadDialog"
+                                type="Emphasized"
+                            />
+
+                            <Button
+                                id="btnDelete"
+                                text="{i18n>remove}"
+                                icon="sap-icon://delete"
+                                press="onDelete"
+                                type="Reject"
+                            />
+                        </OverflowToolbar>
+                    </headerToolbar>
+
+                    <columns>
+                        <Column id="colType">
+                            <Text id="txtType" text="{i18n>uploadType}" />
+                        </Column>
+                        <Column id="colStatus">
+                            <Text id="txtStatus" text="{i18n>status}" />
+                        </Column>
+                        <Column id="colRegStatus">
+                            <Text id="txtRegStatus" text="{i18n>registrationStatus}" />
+                        </Column>
+                        <Column id="colCompanyCode">
+                            <Text id="txtCompanyCode" text="{i18n>companyCode}" />
+                        </Column>
+                        <Column id="colScenario">
+                            <Text id="txtScenario" text="{i18n>scenario}" />
+                        </Column>
+                        <Column id="colFileName">
+                            <Text id="txtFileName" text="{i18n>fileName}" />
+                        </Column>
+                        <Column id="colCreationDate">
+                            <Text id="txtCreationDate" text="{i18n>creationDate}" />
+                        </Column>
+                        <Column id="colLastChange">
+                            <Text id="txtLastChange" text="{i18n>lastChangeDate}" />
+                        </Column>
+                        <Column id="colVendor">
+                            <Text id="txtVendor" text="{i18n>vendorName}" />
+                        </Column>
+                        <Column id="colPO">
+                            <Text id="txtPO" text="{i18n>poNumber}" />
+                        </Column>
+                        <Column id="colInvoice">
+                            <Text id="txtInvoice" text="{i18n>invoiceNumber}" />
+                        </Column>
+                        <Column id="colFattura">
+                            <Text id="txtFattura" text="{i18n>isInvoice}" />
+                        </Column>
+                    </columns>
+
+                    <items>
+                        <ColumnListItem id="colListItem" type="Navigation">
+                            <cells>
+                                <ObjectStatus id="cellType" text="{path: 'tipoCaricamento', formatter: '.formatter.tipoCaricamentoValue'}" />
+                                <ObjectStatus id="cellStatus" text="{path: 'statusBtp', formatter: '.formatter.statoText'}" state="{path: 'statusBtp', formatter: '.formatter.colorStatusBtp'}" active="{path: 'statusBtp', formatter: '.formatter.isErrorClickable'}" press=".onStatusErrorPress" />
+                                <ObjectStatus id="cellRegStatus" text="{path: 'registrationStatus', formatter: '.formatter.registrationStatusText'}" state="{path: 'registrationStatus', formatter: '.formatter.registrationStatusState'}" />
+                                <Text id="cellCompanyCode" text="{companyCode}" />
+                                <Text id="cellScenario" text="{scenario}" />
+                                <Text id="cellFileName" text="{fileName}" />
+                                <Text id="cellCreationDate" text="{createdAt}" />
+                                <Text id="cellLastChange" text="{modifiedAt}" />
+                                <Text id="cellVendor" text="{fornitore}" />
+                                <Text id="cellPO" text="{ordine}" />
+                                <Text id="cellInvoice" text="{invoiceNumber}" />
+                                <Text id="cellFattura" text="{path: 'fattura', formatter: '.formatter.yesNoText'}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

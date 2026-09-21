@@ -1,0 +1,50 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified">
+    <Dialog
+        id="uploadDialog"
+        title="{i18n>uploadInvoiceTitle}"
+        stretch="false"
+        contentWidth="400px">
+        <content>
+            <VBox class="sapUiSmallMargin">
+<!--
+                <Label text="{i18n>companyCodeLabel}" required="true" />
+                <ComboBox
+                    id="cbCompanyCode"
+                    width="100%"
+                    items="{
+                        path: '/CompanyCodes',
+                        parameters: {
+                            $select: 'code,description,country_code'
+                        },
+                        sorter: { path: 'code' },
+                        templateShareable: false
+                    }"
+                    selectionChange="onCompanyCodeChange"
+                    placeholder="{i18n>selectCompanyCode}"
+                >
+                    <core:ListItem key="{code}" text="{code} - {description}" additionalText="{code}" />
+                </ComboBox>
+-->
+
+                <Label text="{i18n>fileLabel}" required="true" class="sapUiSmallMarginTop" />
+                <u:FileUploader
+                    id="fileUploaderDialog"
+                    name="myFileUpload"
+                    uploadUrl=""
+                    tooltip="{i18n>placeholderFileUploader}"
+                    fileType="pdf,xml,zip"
+                    placeholder="{i18n>selectFilePlaceholder}"
+                    style="Emphasized"
+                    width="100%"
+                />
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="{i18n>upload}" type="Emphasized" press="onConfirmUpload" />
+            <Button text="{i18n>cancel}" press="onCancelUpload" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

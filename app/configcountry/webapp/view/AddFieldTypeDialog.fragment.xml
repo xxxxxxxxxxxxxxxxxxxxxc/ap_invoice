@@ -1,0 +1,27 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Dialog id="addFieldTypeDialog" title="{i18n>titleAddFieldType}">
+        <content>
+            <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+                <f:content>
+                    <Label text="{i18n>lblFieldTypeCode}" required="true" />
+                    <Input id="inNewFieldTypeCode" placeholder="e.g. glaccount" />
+                    
+                    <Label text="{i18n>lblFieldTypeName}" required="true" />
+                    <Input id="inNewFieldTypeName" placeholder="e.g. GL Account" />
+                    
+                    <Label text="{i18n>lblFieldTypeDesc}" />
+                    <TextArea id="inNewFieldTypeDesc" rows="3" placeholder="Description..." />
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="{i18n>btnConfirmAdd}" type="Emphasized" press="onConfirmAddFieldType" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>btnCancelAdd}" press="onCancelAddFieldType" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

@@ -1,0 +1,261 @@
+_schema-version: '3.1'
+ID: AP_Invoice
+version: 1.0.0
+description: A simple CAP project.
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+  subdomain: ide-transport-8v6izcd6
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - rm -rf build/dist
+        - mkdir -p build/dist
+        - rm -rf build/ui-deployer
+        - mkdir -p build/ui-deployer
+    - builder: custom
+      commands:
+        - npm install --production
+        - >-
+          bash -c "cds -v | grep 'cds-dk' || npm i --production --no-save
+          @sap/cds-dk"
+        - bash -c "export PATH=$PATH:$(pwd)/node_modules/.bin"
+        - cds build --production
+  after-all:
+    - builder: custom
+      commands:
+        - npm install
+modules:
+  - name: AP_Invoice-apinvoiceextraction
+    type: html5
+    path: app/ap_invoice_extraction
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - bash -c "cd dist && npx bestzip ../dist-zip/apinvoiceextraction.zip *"
+      _artifactName: apinvoiceextraction.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: AP_Invoice-configcountry
+    type: html5
+    path: app/configcountry
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - bash -c "cd dist && npx bestzip ../dist-zip/configcountry.zip *"
+      _artifactName: configcountry.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: AP_Invoice-conversionfunctions
+    type: html5
+    path: app/conversionfunctions
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - bash -c "cd dist && npx bestzip ../dist-zip/conversionfunctions.zip *"
+      _artifactName: conversionfunctions.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: AP_Invoice-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: AP_Invoice-service-uaa
+      - name: AP_Invoice-service-db
+  - name: AP_Invoice-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 256MB
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: AP_Invoice-service-uaa
+      - name: AP_Invoice-service-db
+      - name: AP_Invoice-service-destination
+      - name: AP_Invoice-service-metadata
+      - name: AP_Invoice-service-connectivity
+      - name: AP_Invoice-service-logs
+  - name: AP_Invoice-aux-destinations
+    type: com.sap.application.content
+    parameters:
+      content:
+        subaccount:
+          existing_destinations_policy: update
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: AP_Invoice-service-uaa
+              ServiceInstanceName: AP_Invoice-uaa
+              ServiceKeyName: AP_Invoice-uaa-key
+              sap.cloud.service: lcap.AP_Invoice
+            - Authentication: OAuth2UserTokenExchange
+              Name: AP_Invoice-app-srv
+              TokenServiceInstanceName: AP_Invoice-uaa
+              TokenServiceKeyName: AP_Invoice-uaa-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: lcap.AP_Invoice
+            - Name: AP_Invoice-service-html5-apps-repo-host
+              ServiceInstanceName: AP_Invoice-html5-apps-repo-host
+              ServiceKeyName: AP_Invoice-html5-apps-repo-host-key
+              sap.cloud.service: lcap.AP_Invoice
+            - Authentication: OAuth2UserTokenExchange
+              Name: AP_Invoice-CatalogService
+              TokenServiceInstanceName: AP_Invoice-uaa
+              TokenServiceKeyName: AP_Invoice-uaa-key
+              URL: ~{srv-api/srv-url}/service/CatalogService
+              sap.cloud.service: lcap.AP_Invoice
+              sap.applicationdevelopment.actions.enabled: false
+              sap.build.usage: CAP
+              sap.processautomation.enabled: false
+              HTML5.DynamicDestination: false
+              WebIDEEnabled: false
+              MobileEnabled: false
+              AppgyverEnabled: false
+    build-parameters:
+      no-source: true
+    requires:
+      - name: AP_Invoice-service-uaa
+        parameters:
+          service-key:
+            name: AP_Invoice-uaa-key
+      - name: srv-api
+      - name: AP_Invoice-service-html5-apps-repo-host
+        parameters:
+          service-key:
+            name: AP_Invoice-html5-apps-repo-host-key
+      - name: AP_Invoice-service-destination
+        parameters:
+          content-target: true
+  - name: AP_Invoice-launchpad
+    type: html5
+    path: build/launchpad
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - bash -c "cd dist && npx bestzip ../../../build/dist/launchpad.zip *"
+        - rm -rf dist
+      _artifactName: launchpad.zip
+      supported-platforms: []
+      build-result: ../../build/dist
+  - name: AP_Invoice-aux-ui-deployer
+    type: com.sap.application.content
+    path: build/ui-deployer
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: AP_Invoice-apinvoiceextraction
+          artifacts:
+            - apinvoiceextraction.zip
+          target-path: resources
+        - name: AP_Invoice-configcountry
+          artifacts:
+            - configcountry.zip
+          target-path: resources
+        - name: AP_Invoice-conversionfunctions
+          artifacts:
+            - conversionfunctions.zip
+          target-path: resources
+        - name: AP_Invoice-launchpad
+          artifacts:
+            - launchpad.zip
+          target-path: resources
+    requires:
+      - name: AP_Invoice-service-html5-apps-repo-host
+        parameters:
+          content-target: true
+resources:
+  - type: org.cloudfoundry.managed-service
+    name: AP_Invoice-service-uaa
+    parameters:
+      service: xsuaa
+      service-plan: application
+      service-name: AP_Invoice-uaa
+      path: xs-security.json
+      config:
+        oauth2-configuration:
+          redirect-uris:
+            - https://${subdomain}.launchpad.${default-domain}/login/*
+            - https://${subdomain}.${default-domain}/login/*
+          credential-types:
+            - binding-secret
+            - x509
+        xsappname: AP_Invoice-${space}
+        role-collections: []
+  - type: org.cloudfoundry.managed-service
+    name: AP_Invoice-service-db
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+      service-name: AP_Invoice-db
+  - type: org.cloudfoundry.managed-service
+    name: AP_Invoice-service-destination
+    parameters:
+      service: destination
+      service-plan: lite
+      service-name: AP_Invoice-destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+  - type: org.cloudfoundry.user-provided-service
+    name: AP_Invoice-service-metadata
+    parameters:
+      service: metadata
+      service-plan: standard
+      service-name: AP_Invoice-metadata
+      config:
+        default-domain: ${default-domain}
+  - type: org.cloudfoundry.managed-service
+    name: AP_Invoice-service-connectivity
+    parameters:
+      service: connectivity
+      service-plan: lite
+      service-name: AP_Invoice-connectivity
+  - type: org.cloudfoundry.managed-service
+    name: AP_Invoice-service-logs
+    parameters:
+      service: application-logs
+      service-plan: lite
+      service-name: AP_Invoice-logs
+  - type: org.cloudfoundry.managed-service
+    name: AP_Invoice-service-html5-apps-repo-host
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-name: AP_Invoice-html5-apps-repo-host

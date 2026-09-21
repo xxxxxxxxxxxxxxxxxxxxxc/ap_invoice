@@ -1,0 +1,28 @@
+/* Enter your custom styles here *//* Enter your custom styles here */
+
+.confidenceSuccess .sapMInputBaseContentWrapper {
+  background-color: #dbf0dc !important; /* Light Green */
+  border-color: #2b7d2b !important;
+}
+
+.confidenceWarning .sapMInputBaseContentWrapper {
+  background-color: #ffeccf !important; /* Light Orange */
+  border-color: #e67300 !important;
+}
+
+.confidenceError .sapMInputBaseContentWrapper {
+  background-color: #ffe0e0 !important; /* Light Red */
+  border-color: #b00020 !important;
+}
+
+/* Ensure the input text remains readable */
+.confidenceSuccess input,
+.confidenceWarning input,
+.confidenceError input {
+  font-weight: bold;
+}
+
+.toBeControlledField .sapMInputBaseContentWrapper {
+  background-color: #ffffcc !important; /* Light Yellow */
+  border-color: #ffd700 !important; /* Gold/Yellow Border */
+}

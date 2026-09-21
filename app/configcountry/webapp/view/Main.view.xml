@@ -1,0 +1,83 @@
+<mvc:View controllerName="configcountry.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Page id="page" title="">
+    <content>
+        <IconTabBar id="mainIconTabBar" expanded="true" stretchContentHeight="true">
+            <items>
+                <IconTabFilter id="itfCountries" text="Countries" icon="sap-icon://world" key="countries">
+                    <Table
+                        id="countriesTable"
+                        items="{
+                            path: '/Countries',
+                            sorter: { path: 'code' }
+                        }"
+                        growing="true" growingThreshold="20"
+                        mode="SingleSelectMaster" selectionChange="onSelectionChange"
+                    >
+                        <headerToolbar>
+                            <OverflowToolbar id="otCountries">
+                                <Title id="titleCountries" text="Countries" level="H2" />
+                                <ToolbarSpacer id="tsCountries" />
+                                <Button id="btnAddCountry" text="Add Country" icon="sap-icon://add" press="onAddCountry" type="Emphasized" />
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column id="colCountryCode"><Text id="txtColCountryCode" text="Code" /></Column>
+                            <Column id="colCountryName"><Text id="txtColCountryName" text="Name" /></Column>
+                            <Column id="colCountryDesc"><Text id="txtColCountryDesc" text="Description" /></Column>
+                            <Column id="colCountryActive"><Text id="txtColCountryActive" text="Active" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="cliCountry" type="Navigation">
+                                <cells>
+                                    <Text id="txtCountryCode" text="{code}" />
+                                    <Text id="txtCountryName" text="{name}" />
+                                    <Text id="txtCountryDesc" text="{description}" />
+                                    <ObjectStatus id="osCountryActive" text="{= ${active} ? 'Yes' : 'No' }" state="{= ${active} ? 'Success' : 'Error' }" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </IconTabFilter>
+
+                <IconTabFilter id="itfFieldTypes" text="Global" icon="sap-icon://list" key="fieldTypes">
+                    <Table
+                        id="fieldTypesTable"
+                        items="{
+                            path: '/FieldTypes',
+                            sorter: { path: 'code' }
+                        }"
+                        mode="Delete" delete="onDeleteFieldType"
+                    >
+                        <headerToolbar>
+                            <OverflowToolbar id="otFieldTypes">
+                                <Title id="titleFieldTypes" text="Field Types" level="H2" />
+                                <ToolbarSpacer id="tsFieldTypes" />
+                                <Button id="btnAddFieldType" text="Add Field Type" icon="sap-icon://add" press="onAddFieldType" type="Emphasized" />
+                                <Button id="btnSaveFieldTypes" text="{i18n>btnSaveFieldTypes}" icon="sap-icon://save" press="onSaveFieldTypes" type="Success" />
+                                <Button id="btnCancelFieldTypes" text="{i18n>btnCancelFieldTypes}" icon="sap-icon://reset" press="onCancelFieldTypes" />
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column id="colFieldTypeCode"><Text id="txtColFieldTypeCode" text="Code" /></Column>
+                            <Column id="colFieldTypeName"><Text id="txtColFieldTypeName" text="Name" /></Column>
+                            <Column id="colFieldTypeDesc"><Text id="txtColFieldTypeDesc" text="Description" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="cliFieldType">
+                                <cells>
+                                    <Text id="txtFieldTypeCode" text="{code}" />
+                                    <Input id="inFieldTypeName" value="{name}" placeholder="e.g. Withholding Tax" />
+                                    <Input id="inFieldTypeDesc" value="{description}" placeholder="Description..." />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </IconTabFilter>
+            </items>
+        </IconTabBar>
+    </content>
+    </Page>
+</mvc:View>

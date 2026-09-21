@@ -1,0 +1,56 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Dialog title="Map Search Help Input Parameters" contentHeight="300px" contentWidth="600px">
+        <content>
+            <Table id="searchHelpMappingTable" items="{searchHelpMapModel>/parameters}" width="100%" noDataText="No input parameters are defined for this Search Help.">
+                <columns>
+                    <Column width="40%">
+                        <Text text="Parameter (Label)" />
+                    </Column>
+                    <Column width="30%">
+                        <Text text="Mapping Type" />
+                    </Column>
+                    <Column width="30%">
+                        <Text text="Value / Field Name" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <VBox>
+                                <Text text="{searchHelpMapModel>key}" class="sapMTextBold" />
+                                <Text text="{searchHelpMapModel>label}" class="sapMTextSmall sapUiTinyMarginTop" />
+                            </VBox>
+                            <ComboBox selectedKey="{searchHelpMapModel>type}" width="100%">
+                                <core:Item key="schema" text="Schema Field (e.g. Bukrs)" />
+                                <core:Item key="fixed" text="Fixed Value" />
+                            </ComboBox>
+                            <VBox id="vbSearchHelpMapInputs" width="100%">
+                                <ComboBox 
+                                    id="cbSearchHelpMapSchema"
+                                    selectedKey="{searchHelpMapModel>value}" 
+                                    items="{searchHelpMapModel>/availableFields}"
+                                    visible="{= ${searchHelpMapModel>type} === 'schema'}"
+                                    width="100%"
+                                    placeholder="Select Field Name...">
+                                    <core:Item id="itemSearchHelpMapField" key="{searchHelpMapModel>key}" text="{searchHelpMapModel>text} ({searchHelpMapModel>key})" />
+                                </ComboBox>
+                                <Input 
+                                    id="inpSearchHelpMapFixed"
+                                    value="{searchHelpMapModel>value}" 
+                                    placeholder="Static Value..." 
+                                    visible="{= ${searchHelpMapModel>type} === 'fixed'}"
+                                    width="100%" />
+                            </VBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+        <buttons>
+            <Button text="Apply" type="Emphasized" press="onSaveSearchHelpMapping" />
+            <Button text="Cancel" press="onCloseSearchHelpMapping" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

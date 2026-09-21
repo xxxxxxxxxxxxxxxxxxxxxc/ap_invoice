@@ -1,0 +1,32 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Popover
+        id="conversionPopover"
+        title="{i18n>conversionInfoTitle}"
+        class="sapUiContentPadding"
+        placement="Auto">
+        <content>
+            <VBox id="conversionVBox" class="sapUiSmallMargin">
+                <Label id="lblOriginal" text="{i18n>originalValue}:" design="Bold"/>
+                <Text id="txtOriginal" text="{conversionModel>/original}"/>
+                
+                <Label id="lblFunction" text="{i18n>functionName}:" design="Bold" class="sapUiSmallMarginTop"/>
+                <Text id="txtFunction" text="{conversionModel>/function}"/>
+
+                <Label id="lblConverted" text="{i18n>convertedValue}:" design="Bold" class="sapUiSmallMarginTop"/>
+                <Text id="txtConverted" text="{conversionModel>/converted}"/>
+
+                <Label id="lblError" text="{i18n>error}:" design="Bold" class="sapUiSmallMarginTop" visible="{= !!${conversionModel>/error} }"/>
+                <ObjectStatus id="statError" text="{conversionModel>/error}" state="Error" visible="{= !!${conversionModel>/error} }"/>
+            </VBox>
+        </content>
+        <footer>
+            <Toolbar id="conversionToolbar">
+                <ToolbarSpacer id="conversionSpacer"/>
+                <Button id="btnCloseConversion" text="{i18n>close}" press="onCloseConversionInfo"/>
+            </Toolbar>
+        </footer>
+    </Popover>
+</core:FragmentDefinition>

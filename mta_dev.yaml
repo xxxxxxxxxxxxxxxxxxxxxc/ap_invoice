@@ -1,0 +1,279 @@
+_schema-version: "3.1"
+ID: AP_Invoice
+description: A simple CAP project.
+version: 1.0.0
+modules:
+  - name: AP_Invoice-apinvoiceextraction
+    type: html5
+    path: app/ap_invoice_extraction
+    build-parameters:
+      _artifactName: apinvoiceextraction.zip
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+  - name: AP_Invoice-configcountry
+    type: html5
+    path: app/configcountry
+    build-parameters:
+      _artifactName: configcountry.zip
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+  - name: AP_Invoice-conversionfunctions
+    type: html5
+    path: app/conversionfunctions
+    build-parameters:
+      _artifactName: conversionfunctions.zip
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+  - name: AP_Invoice-usercountries
+    type: html5
+    path: app/usercountries
+    build-parameters:
+      _artifactName: usercountries.zip
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+  - name: AP_Invoice-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: AP_Invoice-service-uaa
+      - name: AP_Invoice-service-db
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+  - name: AP_Invoice-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: AP_Invoice-service-uaa
+      - name: AP_Invoice-service-db
+      - name: AP_Invoice-service-destination
+      - name: AP_Invoice-service-metadata
+      - name: AP_Invoice-service-connectivity
+      - name: AP_Invoice-service-logs
+      - name: AP_Invoice-service-autoscaler
+        parameters:
+          config:
+            instance_min_count: 1
+            instance_max_count: 5
+            scaling_rules:
+              - metric_type: memoryutil
+                threshold: 90
+                operator: ">="
+                adjustment: "+1"
+              - metric_type: memoryutil
+                threshold: 30
+                operator: "<"
+                adjustment: "-1"
+
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: 'https://apinvoice-srv-dev.${app-domain}'
+    parameters:
+      memory: 1024MB
+      disk-quota: 4096MB
+      app-domain: 'cf.prysmian.com'
+      routes:
+        - route: 'https://apinvoice-srv-dev.${app-domain}'
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+  - name: AP_Invoice-aux-destinations
+    type: com.sap.application.content
+    requires:
+      - name: AP_Invoice-service-uaa
+        parameters:
+          service-key:
+            name: AP_Invoice-uaa-key
+      - name: srv-api
+      - name: AP_Invoice-service-html5-apps-repo-host
+        parameters:
+          service-key:
+            name: AP_Invoice-html5-apps-repo-host-key
+      - name: AP_Invoice-service-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        subaccount:
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: AP_Invoice-service-uaa
+              ServiceInstanceName: AP_Invoice-uaa
+              ServiceKeyName: AP_Invoice-uaa-key
+              sap.cloud.service: lcap.AP_Invoice
+            - Authentication: OAuth2UserTokenExchange
+              Name: AP_Invoice-app-srv
+              TokenServiceInstanceName: AP_Invoice-uaa
+              TokenServiceKeyName: AP_Invoice-uaa-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: lcap.AP_Invoice
+              HTML5.Timeout: 600000
+            - Name: AP_Invoice-service-html5-apps-repo-host
+              ServiceInstanceName: AP_Invoice-html5-apps-repo-host
+              ServiceKeyName: AP_Invoice-html5-apps-repo-host-key
+              sap.cloud.service: lcap.AP_Invoice
+            - AppgyverEnabled: false
+              Authentication: OAuth2UserTokenExchange
+              HTML5.DynamicDestination: false
+              MobileEnabled: false
+              Name: AP_Invoice-CatalogService
+              TokenServiceInstanceName: AP_Invoice-uaa
+              TokenServiceKeyName: AP_Invoice-uaa-key
+              URL: ~{srv-api/srv-url}/service/CatalogService
+              WebIDEEnabled: false
+              sap.applicationdevelopment.actions.enabled: false
+              sap.build.usage: CAP
+              sap.cloud.service: lcap.AP_Invoice
+              HTML5.Timeout: 600000
+              sap.processautomation.enabled: false
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+
+  - name: AP_Invoice-aux-ui-deployer
+    type: com.sap.application.content
+    path: build/ui-deployer
+    requires:
+      - name: AP_Invoice-service-html5-apps-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - apinvoiceextraction.zip
+          name: AP_Invoice-apinvoiceextraction
+          target-path: resources
+        - artifacts:
+            - configcountry.zip
+          name: AP_Invoice-configcountry
+          target-path: resources
+        - artifacts:
+            - conversionfunctions.zip
+          name: AP_Invoice-conversionfunctions
+          target-path: resources
+        - artifacts:
+            - usercountries.zip
+          name: AP_Invoice-usercountries
+          target-path: resources
+
+resources:
+  - name: AP_Invoice-service-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      app-domain: 'cf.prysmian.com'
+      config:
+        oauth2-configuration:
+          credential-types:
+            - binding-secret
+            - x509
+          redirect-uris:
+            - https://${subdomain}.launchpad.${default-domain}/login/*
+            - https://${subdomain}.${default-domain}/login/*
+            - https://*.${app-domain}/**
+        role-collections: []
+        xsappname: AP_Invoice-${space}
+      path: xs-security.json
+      service: xsuaa
+      service-name: AP_Invoice-uaa
+      service-plan: application
+  - name: AP_Invoice-service-db
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: hana
+      service-name: AP_Invoice-db
+      service-plan: hdi-shared
+  - name: AP_Invoice-service-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: AP_Invoice-destination
+      service-plan: lite
+  - name: AP_Invoice-service-metadata
+    type: org.cloudfoundry.user-provided-service
+    parameters:
+      config:
+        default-domain: ${default-domain}
+      service: metadata
+      service-name: AP_Invoice-metadata
+      service-plan: standard
+  - name: AP_Invoice-service-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-name: AP_Invoice-connectivity
+      service-plan: lite
+  - name: AP_Invoice-service-logs
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-name: AP_Invoice-logs
+      service-plan: lite
+  - name: AP_Invoice-service-html5-apps-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: AP_Invoice-html5-apps-repo-host
+      service-plan: app-host
+  - name: AP_Invoice-service-autoscaler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: standard
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+  subdomain: ide-transport-8v6izcd6
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - rm -rf build/dist
+        - mkdir -p build/dist
+        - rm -rf build/ui-deployer
+        - mkdir -p build/ui-deployer
+    - builder: custom
+      commands:
+        - npm install --production
+        - bash -c "cds -v | grep 'cds-dk' || npm i --production --no-save @sap/cds-dk"
+        - bash -c "export PATH=$PATH:$(pwd)/node_modules/.bin"
+        - cds build --production
+  after-all:
+    - builder: custom
+      commands:
+        - npm install

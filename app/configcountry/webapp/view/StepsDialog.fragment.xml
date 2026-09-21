@@ -1,0 +1,59 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog title="{i18n>titStepsDialog}" contentWidth="800px" contentHeight="400px">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <!-- Title removed, Dialog has title property -->
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://add" text="{i18n>btnAddStep}" press="onAddStep" />
+                </contentRight>
+            </Bar>
+        </customHeader>
+        <content>
+            <Table id="stepsTable" items="{stepsModel>/steps}" mode="Delete" delete="onDeleteStep">
+                <!-- headerToolbar removed to avoid duplicate button -->
+                <columns>
+                    <Column width="4rem"><Text text="{i18n>colStepOrder}" /></Column>
+                    <Column width="40%"><Text text="{i18n>colFunction}" /></Column>
+                    <Column><Text text="{i18n>colParams}" /></Column>
+                    <Column width="15%"><Text text="" /></Column> <!-- Reorder buttons -->
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{stepsModel>stepOrder}" />
+                            
+                            <ComboBox
+                                selectedKey="{stepsModel>conversionFunction_id}"
+                                items="{
+                                    path: '/ConversionFunctions',
+                                    sorter: { path: 'name' },
+                                    length: 2000,
+                                    templateShareable: true
+                                }"
+                                width="100%"
+                                selectionChange="onStepFunctionChange"
+                            >
+                                <core:Item key="{id}" text="{name}" />
+                            </ComboBox>
+
+                            <Button icon="sap-icon://syntax" press="onConfigureStepParams" enabled="{= !!${stepsModel>conversionFunction_id} }" />
+                            
+                            <HBox>
+                                <Button icon="sap-icon://arrow-top" press="onMoveStepUp" type="Transparent" />
+                                <Button icon="sap-icon://arrow-bottom" press="onMoveStepDown" type="Transparent" />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+        <beginButton>
+            <Button text="{i18n>apply}" type="Emphasized" press="onApplySteps" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press="onCancelSteps" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

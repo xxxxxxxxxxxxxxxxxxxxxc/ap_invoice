@@ -1,0 +1,157 @@
+{
+	"_version": "1.76.0",
+	"sap.app": {
+		"id": "configcountry",
+		"type": "application",
+		"i18n": {
+			"bundleUrl": "i18n/i18n.properties",
+			"supportedLocales": [
+				""
+			]
+		},
+		"applicationVersion": {
+			"version": "0.0.1"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"resources": "resources.json",
+		"sourceTemplate": {
+			"id": "@sap/generator-fiori:basic",
+			"version": "1.20.0",
+			"toolsId": "cf5ffb56-27da-4e14-b0b5-1b6930308b81"
+		},
+		"dataSources": {
+			"mainService": {
+				"uri": "/service/CatalogService/",
+				"type": "OData",
+				"settings": {
+					"annotations": [],
+					"odataVersion": "4.0"
+				}
+			}
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"configschema-display": {
+					"semanticObject": "configschema",
+					"action": "display",
+					"title": "{{configschema-display.flpTitle}}",
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					}
+				}
+			}
+		}
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"flexEnabled": true,
+		"dependencies": {
+			"minUI5Version": "1.143.2",
+			"libs": {
+				"sap.m": {},
+				"sap.ui.core": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "configcountry.i18n.i18n",
+					"supportedLocales": [
+						""
+					]
+				}
+			},
+			"": {
+				"dataSource": "mainService",
+				"preload": true,
+				"settings": {
+					"operationMode": "Server",
+					"autoExpandSelect": true,
+					"earlyRequests": true
+				}
+			}
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"controlAggregation": "pages",
+				"controlId": "app",
+				"transition": "slide",
+				"type": "View",
+				"viewType": "XML",
+				"path": "configcountry.view",
+				"async": true,
+				"viewPath": "configcountry.view"
+			},
+			"routes": [
+				{
+					"name": "RouteMain",
+					"pattern": ":?query:",
+					"target": [
+						"TargetMain"
+					]
+				},
+				{
+					"name": "Detail",
+					"pattern": "Detail/{countryCode}",
+					"target": [
+						"TargetDetail"
+					]
+				}
+			],
+			"targets": {
+				"TargetMain": {
+					"id": "Main",
+					"name": "Main"
+				},
+				"TargetDetail": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewId": "Detail",
+					"viewName": "Detail"
+				}
+			}
+		},
+		"rootView": {
+			"viewName": "configcountry.view.App",
+			"type": "XML",
+			"id": "App",
+			"async": true
+		},
+		"flexBundle": false
+	},
+	"sap.cloud": {
+		"public": true,
+		"service": "lcap.AP_Invoice"
+	}
+}

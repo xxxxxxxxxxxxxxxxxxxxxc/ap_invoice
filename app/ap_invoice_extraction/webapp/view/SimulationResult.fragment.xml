@@ -1,0 +1,128 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+    <Dialog id="simulationResultDialog" title="{i18n>simulationResultTitle}" contentWidth="80%" contentHeight="80%" resizable="true" draggable="true">
+        <content>
+            <VBox id="simulationResultVBox" class="sapUiSmallMargin">
+                <f:SimpleForm id="simulationHeaderForm" editable="false" layout="ResponsiveGridLayout" title="{i18n>simulationHeaderTitle}" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">
+                    <f:content>
+                        <Label id="lblSimCompCode" text="{i18n>simCompanyCode}" />
+                        <Text id="txtSimCompCode" text="{simulationModel>/header/CompCode}" />
+                        <Label id="lblSimVendor" text="{i18n>simVendor}" />
+                        <Text id="txtSimVendor" text="{simulationModel>/header/DiffInv}" />
+                        <Label id="lblSimDocDate" text="{i18n>simDocDate}" />
+                        <Text id="txtSimDocDate" text="{simulationModel>/header/DocDate}" />
+                        <Label id="lblSimPstngDate" text="{i18n>simPstngDate}" />
+                        <Text id="txtSimPstngDate" text="{simulationModel>/header/PstngDate}" />
+                        <Label id="lblSimRefDocNo" text="{i18n>simRefDocNo}" />
+                        <Text id="txtSimRefDocNo" text="{simulationModel>/header/RefDocNoLong}" />
+                        <Label id="lblSimCurrency" text="{i18n>simCurrency}" />
+                        <Text id="txtSimCurrency" text="{simulationModel>/header/Currency}" />
+                        <Label id="lblSimGrossAmount" text="{i18n>simGrossAmount}" />
+                        <Text id="txtSimGrossAmount" text="{simulationModel>/header/GrossAmount}" />
+                        <Label id="lblSimInvDocNo" text="{i18n>simInvDocNo}" />
+                        <Text id="txtSimInvDocNo" text="{simulationModel>/header/InvDocNo}" />
+                         <Label id="lblSimInvYear" text="{i18n>simInvYear}" />
+                        <Text id="txtSimInvYear" text="{simulationModel>/header/InvYear}" />
+                    </f:content>
+                </f:SimpleForm>
+
+                <Panel id="simulationItemsPanel" headerText="{i18n>simulationItemsTitle}" expandable="true" expanded="true" width="auto" class="sapUiResponsiveMargin">
+                    <Table id="simulationItemsTable" items="{simulationModel>/items}" width="auto" sticky="ColumnHeaders">
+                        <columns>
+                             <Column id="colSimItem"><Text id="txtColSimItem" text="{i18n>simItem}" /></Column>
+                             <Column id="colSimPoNumber"><Text id="txtColSimPoNumber" text="{i18n>simPoNumber}" /></Column>
+                             <Column id="colSimPoItem"><Text id="txtColSimPoItem" text="{i18n>simPoItem}" /></Column>
+                             <Column id="colSimAmount"><Text id="txtColSimAmount" text="{i18n>simAmount}" /></Column>
+                             <Column id="colSimQty"><Text id="txtColSimQty" text="{i18n>simQty}" /></Column>
+                             <Column id="colSimTaxCode"><Text id="txtColSimTaxCode" text="{i18n>simTaxCode}" /></Column>
+                             <Column id="colSimText"><Text id="txtColSimText" text="{i18n>simText}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="itemSimListItem">
+                                <cells>
+                                    <Text id="txtSimItem" text="{simulationModel>InvoiceDocItem}" />
+                                    <Text id="txtSimPoNumber" text="{simulationModel>PoNumber}" />
+                                    <Text id="txtSimPoItem" text="{simulationModel>PoItem}" />
+                                    <Text id="txtSimAmount" text="{simulationModel>ItemAmount}" />
+                                    <Text id="txtSimQty" text="{simulationModel>Quantity}" />
+                                     <Text id="txtSimTaxCode" text="{simulationModel>TaxCode}" />
+                                    <Text id="txtSimText" text="{simulationModel>ItemText}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </Panel>
+                
+                <Panel id="simulationGlAccountPanel" headerText="{i18n>simulationGlAccountTitle}" expandable="true" expanded="true" width="auto" class="sapUiResponsiveMargin" visible="{= ${simulationModel>/glAccounts}.length > 0 }">
+                    <Table id="simulationGlAccountTable" items="{simulationModel>/glAccounts}" width="auto" sticky="ColumnHeaders">
+                        <columns>
+                             <Column id="colSimGlItem"><Text id="txtColSimGlItem" text="{i18n>simItem}" /></Column>
+                             <Column id="colSimGlAccount"><Text id="txtColSimGlAccount" text="{i18n>simGlAccount}" /></Column>
+                             <Column id="colSimGlAmount"><Text id="txtColSimGlAmount" text="{i18n>simAmount}" /></Column>
+                             <Column id="colSimGlTaxCode"><Text id="txtColSimGlTaxCode" text="{i18n>simTaxCode}" /></Column>
+                             <Column id="colSimGlCostCenter"><Text id="txtColSimGlCostCenter" text="{i18n>simGlCostCenter}" /></Column>
+                             <Column id="colSimGlText"><Text id="txtColSimGlText" text="{i18n>simText}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="glSimListItem">
+                                <cells>
+                                    <Text id="txtSimGlItem" text="{simulationModel>InvoiceDocItem}" />
+                                    <Text id="txtSimGlAccount" text="{simulationModel>GlAccount}" />
+                                    <Text id="txtSimGlAmount" text="{simulationModel>ItemAmount}" />
+                                    <Text id="txtSimGlTaxCode" text="{simulationModel>TaxCode}" />
+                                    <Text id="txtSimGlCostCenter" text="{simulationModel>Costcenter}" />
+                                    <Text id="txtSimGlText" text="{simulationModel>ItemText}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </Panel>
+
+                 <!-- Taxes -->
+                 <Panel id="simulationTaxesPanel" headerText="{i18n>simulationTaxesTitle}" expandable="true" expanded="true" width="auto" class="sapUiResponsiveMargin" visible="{= ${simulationModel>/taxes}.length > 0 }">
+                    <Table id="simulationTaxesTable" items="{simulationModel>/taxes}" width="auto" sticky="ColumnHeaders">
+                        <columns>
+                             <Column id="colSimTaxCodeT"><Text id="txtColSimTaxCodeT" text="{i18n>simTaxCode}" /></Column>
+                             <Column id="colSimTaxAmount"><Text id="txtColSimTaxAmount" text="{i18n>simTaxAmount}" /></Column>
+                             <Column id="colSimBaseAmount"><Text id="txtColSimBaseAmount" text="{i18n>simBaseAmount}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="taxSimListItem">
+                                <cells>
+                                    <Text id="txtSimTaxCodeT" text="{simulationModel>TaxCode}" />
+                                    <Text id="txtSimTaxAmount" text="{simulationModel>TaxAmount}" />
+                                    <Text id="txtSimBaseAmount" text="{simulationModel>TaxBaseAmount}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </Panel>
+
+                <!-- Withholding Taxes -->
+                 <Panel id="simulationWithTaxPanel" headerText="{i18n>simulationWithTaxTitle}" expandable="true" expanded="true" width="auto" class="sapUiResponsiveMargin" visible="{= ${simulationModel>/withholdingTaxes}.length > 0 }">
+                    <Table id="simulationWithTaxTable" items="{simulationModel>/withholdingTaxes}" width="auto" sticky="ColumnHeaders">
+                        <columns>
+                             <Column id="colSimWtType"><Text id="txtColSimWtType" text="{i18n>simWtType}" /></Column>
+                             <Column id="colSimWtCode"><Text id="txtColSimWtCode" text="{i18n>simWtCode}" /></Column>
+                             <Column id="colSimWtBase"><Text id="txtColSimWtBase" text="{i18n>simBaseAmount}" /></Column>
+                             <Column id="colSimWtAmount"><Text id="txtColSimWtAmount" text="{i18n>simAmount}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="wtSimListItem">
+                                <cells>
+                                    <Text id="txtSimWtType" text="{simulationModel>WiTaxType}" />
+                                    <Text id="txtSimWtCode" text="{simulationModel>WiTaxCode}" />
+                                    <Text id="txtSimWtBase" text="{simulationModel>WiTaxBase}" />
+                                    <Text id="txtSimWtAmount" text="{simulationModel>WiTaxAmt}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </Panel>
+
+            </VBox>
+        </content>
+        <beginButton>
+            <Button id="btnCloseSimulation" text="{i18n>close}" press="onCloseSimulationResult" />
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

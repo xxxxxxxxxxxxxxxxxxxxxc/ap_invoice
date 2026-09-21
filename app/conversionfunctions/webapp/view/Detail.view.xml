@@ -1,0 +1,53 @@
+<mvc:View controllerName="conversionfunctions.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m" xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core">
+    <Page id="pageDetail" title="{i18n>functionDetails}" showNavButton="true" navButtonPress="onNavBack">
+        <content>
+            <f:SimpleForm id="SimpleFormDisplay354"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                title="{i18n>functionDetails}"
+                labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="4" emptySpanL="4" emptySpanM="4" emptySpanS="0"
+                columnsXL="1" columnsL="1" columnsM="1"
+                singleContainerFullSize="false">
+                <f:content>
+                    <Label text="{i18n>name}" required="true"/>
+                    <Input value="{name}"/>
+                    
+                    <Label text="{i18n>description}"/>
+                    <Input value="{description}"/>
+                    
+                    <Label text="{i18n>serviceUrl}"/>
+                    <Input value="{serviceUrl}" placeholder='/sap/opu/odata/service/Set?$filter=Field eq "\{paramName\}"'/>
+                    
+                    <Label text="{i18n>inputParams}"/>
+                    <Input value="{inputParams}" placeholder='\{"paramName": "description"\} or ["paramName"]'/>
+
+                    <Label text="{i18n>outputField}"/>
+                    <Input value="{outputField}" placeholder='Result Property Name (e.g. CompanyCode)'/>
+                    
+
+                    <Label text="{i18n>destination}"/>
+                    <Input value="{destination}"/>
+
+                    <Label text="{i18n>method}"/>
+                    <Select selectedKey="{method}" width="100%">
+                        <core:Item key="GET" text="GET" />
+                        <core:Item key="POST" text="POST" />
+                        <core:Item key="PUT" text="PUT" />
+                        <core:Item key="DELETE" text="DELETE" />
+                    </Select>
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer/>
+                <Button text="{i18n>save}" type="Emphasized" press="onSave"/>
+                <Button text="{i18n>cancel}" press="onCancel"/>
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>

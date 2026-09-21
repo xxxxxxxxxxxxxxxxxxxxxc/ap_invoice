@@ -1,0 +1,4 @@
+code;name;description;isDefault
+header;Header;Header fields (Global);true
+lineItem;Line Item;Standard repeating items;true
+withholdingtax;Withholding Tax;Repeating withholding tax items;false

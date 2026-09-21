@@ -1,0 +1,22 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <SelectDialog
+        id="countrySelectionDialog"
+        title="{i18n>selectCountry}"
+        class="sapUiPopupWithPadding"
+        items="{
+            path: 'allowedCountries>/'
+        }"
+        search=".onCountrySearch"
+        confirm=".onCountrySelect"
+        liveChange=".onCountrySearch"
+    >
+        <StandardListItem
+            title="{allowedCountries>name}"
+            description="{allowedCountries>code}"
+            icon="sap-icon://world"
+        />
+    </SelectDialog>
+</core:FragmentDefinition>

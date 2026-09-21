@@ -1,0 +1,40 @@
+<mvc:View controllerName="usercountries.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Page id="pageMain" title="{i18n>appTitle}">
+        <content>
+            <Table id="table" items="{
+                path: '/UserCountries',
+                parameters: {
+                    $expand: 'country'
+                }
+            }" mode="MultiSelect">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="{i18n>appTitle}" level="H2"/>
+                        <ToolbarSpacer/>
+                        <SearchField width="25%" search=".onSearch" placeholder="{i18n>searchPlaceholder}"/>
+                        <Button icon="sap-icon://add" text="{i18n>add}" press=".onAdd" type="Emphasized"/>
+                        <Button icon="sap-icon://delete" text="{i18n>delete}" press=".onDelete" type="Reject"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column>
+                        <Text text="{i18n>email}"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="{i18n>country}"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{email}"/>
+                            <Text text="{country/code} - {country/name}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

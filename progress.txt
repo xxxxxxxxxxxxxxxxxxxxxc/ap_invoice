@@ -1,0 +1,3 @@
+Task: Implement Field Deletion UI in Detail.controller.js (Completed)
+Task: Implement Field Deletion Persistence in srv/service.js (Completed)
+Task: Improve Deletion Confirmation with Mapping Count (Completed)

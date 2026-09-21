@@ -1,0 +1,32 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Dialog id="addDialog" title="{i18n>addPermissionTitle}">
+        <content>
+            <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+                <f:content>
+                    <Label text="{i18n>email}" required="true"/>
+                    <Input id="inputEmail" type="Email" placeholder="{i18n>emailPlaceholder}"/>
+                    
+                    <Label text="{i18n>country}" required="true"/>
+                    <Select id="selectCountry" items="{
+                        path: '/Countries',
+                        filters: [
+                            { path: 'active', operator: 'EQ', value1: true }
+                        ]
+                    }">
+                        <core:Item key="{code}" text="{code} - {name}"/>
+                    </Select>
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="{i18n>save}" press=".onSave" type="Emphasized"/>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press=".onCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
