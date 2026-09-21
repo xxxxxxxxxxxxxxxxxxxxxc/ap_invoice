@@ -178,7 +178,7 @@ module.exports = cds.service.impl(async function (srv) {
   // --- CHATBOT HANDLER ---
 
   this.on("chatbotMessage", async (req) => {
-       return await ChatbotHandler.chatbotMessage(req);
+       return await ChatbotHandler.chatbotMessage(req, this.entities);
   });
 
   this.on("getUserAllowedCountries", async (req) => {

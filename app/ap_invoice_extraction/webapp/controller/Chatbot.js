@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/core/Fragment",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast"
-], function (Fragment, JSONModel, MessageToast) {
+    "sap/m/MessageToast",
+    "sap/base/i18n/Localization"
+], function (Fragment, JSONModel, MessageToast, Localization) {
     "use strict";
 
     /**
@@ -25,6 +26,16 @@ sap.ui.define([
         return {
             popover: null,
             scroll: null,
+
+            // Conversation the backend keeps the history for. It is created by the
+            // first reply and sent back on every following message, so the assistant
+            // answers in context instead of seeing every message as the first one.
+            sessionId: null,
+
+            // Invoice the user was looking at when the chat was opened. It is refreshed
+            // on every toggle and sent along with the message, so the assistant can
+            // answer about "this invoice" without the user typing the file name.
+            documentId: null,
 
             text: function (sKey) {
                 return oComponent.getModel("i18n").getResourceBundle().getText(sKey);
@@ -58,8 +69,8 @@ sap.ui.define([
             },
 
             /**
-             * Sends the typed message to the CAP action "chatbotMessage"
-             * and displays the reply returned by the backend.
+             * Sends the typed message to the CAP action "chatbotMessage" together with
+             * the conversation id and the UI language, then displays the reply.
              */
             onChatbotSend: async function () {
                 var oModel = this.popover.getModel("chatbot");
@@ -76,10 +87,14 @@ sap.ui.define([
                 try {
                     var oOperation = oComponent.getModel().bindContext("/chatbotMessage(...)");
                     oOperation.setParameter("message", sText);
+                    oOperation.setParameter("sessionId", this.sessionId);
+                    oOperation.setParameter("locale", Localization.getLanguage());
+                    oOperation.setParameter("documentId", this.documentId || null);
 
                     await oOperation.execute();
 
                     var oResult = oOperation.getBoundContext().getObject() || {};
+                    this.sessionId = oResult.sessionId || this.sessionId;
                     this.addMessage("bot", oResult.reply || this.text("chatbotError"));
                 } catch (err) {
                     console.error("Chatbot call failed", err);
@@ -127,14 +142,20 @@ sap.ui.define([
          * is loaded only once.
          * @param {sap.ui.core.UIComponent} oComponent the owner component
          * @param {sap.ui.core.Control} oOpener the control the popover is anchored to
+         * @param {string} [sDocumentId] invoice shown by the page the chat is opened from
          * @returns {Promise} resolved once the popover has been opened or closed
          */
-        toggle: function (oComponent, oOpener) {
+        toggle: function (oComponent, oOpener, sDocumentId) {
             if (!oComponent._pChatbot) {
                 oComponent._pChatbot = loadPopover(oComponent);
             }
 
             return oComponent._pChatbot.then(function (oChatbot) {
+                // the popover is shared by every page: refresh the context on each
+                // opening, otherwise the chat would keep talking about the invoice
+                // the user opened it from the first time
+                oChatbot.documentId = sDocumentId || null;
+
                 if (oChatbot.popover.isOpen()) {
                     oChatbot.popover.close();
                 } else {

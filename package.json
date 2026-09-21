@@ -105,6 +105,21 @@
       "model": "gemini-2.5-pro",
       "temperature": 0
     },
+    "chatbot": {
+      "enabled": true,
+      "model": "gemini-2.5-flash",
+      "temperature": 0.3,
+      "maxOutputTokens": 512,
+      "timeoutMs": 30000,
+      "historyLength": 8,
+      "historyStore": "db",
+      "historyTtlMinutes": 720,
+      "tools": {
+        "enabled": false,
+        "disabled": [],
+        "maxIterations": 6
+      }
+    },
     "requires": {
       "AI_Core": {
         "kind": "rest",

@@ -3,8 +3,11 @@ using {db} from '../db/schema';
 @path: '/service/CatalogService'
 service CatalogService {
     type ChatbotReply {
-        reply     : String;
+        reply     : LargeString;
         timestamp : String;
+        // conversation the reply belongs to: the client sends it back on the next
+        // message so the assistant keeps the context of the chat
+        sessionId : String;
     }
 
     type JobsResult {
@@ -252,8 +255,10 @@ service CatalogService {
     // Action to execute Search Help dynamically
     action   executeSearchHelp(functionId: String, filters: LargeString)                                                                                      returns LargeString;
 
-    // Chatbot: sends a user message and returns the assistant reply
-    action   chatbotMessage(message: String)                                                                                                                  returns ChatbotReply;
+    // Chatbot: sends a user message and returns the assistant reply.
+    // sessionId and locale are optional: without a sessionId a new conversation is started.
+    // documentId is the invoice open in the UI, so the assistant knows what "this invoice" is.
+    action   chatbotMessage(message: String, sessionId: String null, locale: String null, documentId: String null)                                            returns ChatbotReply;
 }
 
 annotate CatalogService with @requires: ['authenticated-user'];

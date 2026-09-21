@@ -151,3 +151,17 @@ entity UserCountries : managed {
     key country : Association to Countries;
 }
 
+
+// Chatbot conversation memory.
+// Written and read only by the chat layer (srv/chatbot): it is not exposed in
+// CatalogService, so it is invisible to the existing UIs and APIs. Persisting the
+// history here keeps the conversation alive across restarts and across the several
+// srv instances the app can scale to.
+entity ChatMessages : managed {
+    key id             : UUID;
+        conversationId : String(36)  @title: 'Conversation ID' @Common.Label: 'Conversation ID';
+        userId         : String(255) @title: 'User'            @Common.Label: 'User';
+        role           : String(20)  @title: 'Role'            @Common.Label: 'Role';
+        sequence       : Integer     @title: 'Sequence'        @Common.Label: 'Sequence';
+        content        : LargeString @title: 'Content'         @Common.Label: 'Content';
+}

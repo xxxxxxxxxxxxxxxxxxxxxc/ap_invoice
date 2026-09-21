@@ -109,7 +109,18 @@ sap.ui.define([
          * @param {sap.ui.base.Event} oEvent the press event of the chatbot button
          */
         onOpenChatbot: function (oEvent) {
-            Chatbot.toggle(this.getOwnerComponent(), oEvent.getSource());
+            Chatbot.toggle(this.getOwnerComponent(), oEvent.getSource(), this.getChatbotDocumentId());
+        },
+
+        /**
+         * Id of the invoice the current page is showing, sent to the assistant so that
+         * questions about "this invoice" are answered on real data. Pages that do not
+         * display a single document (e.g. the Home list) return nothing; the Detail
+         * controller overrides this method.
+         * @returns {string|null} the document id, or null when the page shows no invoice
+         */
+        getChatbotDocumentId: function () {
+            return null;
         },
 
         /**

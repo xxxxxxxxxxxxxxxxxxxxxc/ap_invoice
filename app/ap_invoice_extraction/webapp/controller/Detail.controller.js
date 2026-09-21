@@ -33,6 +33,15 @@ sap.ui.define([
             this.setModel(oDataModel, "editableData");
             this.getRouter().getRoute("Detail").attachPatternMatched(this._onObjectMatched, this);
         },
+        /**
+         * The Detail page always shows one document: hand its id to the assistant, so
+         * that "this invoice" resolves to the document on screen.
+         * @returns {string|null} the document id currently bound to the view
+         */
+        getChatbotDocumentId: function () {
+            return this._sId || null;
+        },
+
         _onObjectMatched: function (oEvent) {
             var sId = oEvent.getParameter("arguments").id;
             this._sId = sId;

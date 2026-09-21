@@ -331,6 +331,23 @@ sap.ui.define([
             }
         },
 
+        /**
+         * The Home page lists many documents, so there is an invoice context only when
+         * the user has ticked exactly one row: that row is then handed to the assistant
+         * as the invoice the question is about.
+         * @returns {string|null} the id of the single selected document, or null
+         */
+        getChatbotDocumentId: function () {
+            const oTable = this.byId("DocumentTable");
+            const aSelectedItems = oTable ? oTable.getSelectedItems() : [];
+
+            if (aSelectedItems.length !== 1) {
+                return null;
+            }
+            const oContext = aSelectedItems[0].getBindingContext();
+            return oContext ? oContext.getProperty("id") : null;
+        },
+
         /** CANCELLAZIONE RECORD ODATA V4 (Multi-Delete) */
         onDelete: function () {
             const oTable = this.byId("DocumentTable");
