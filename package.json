@@ -23,10 +23,11 @@
     "form-data": "^4.0.6",
     "hdb": "^2.26.3",
     "langchain": "^0.3.0",
+    "mammoth": "^1.12.3",
     "passport": "^0.7.0",
     "pdf-parse": "^1.1.1",
-    "pdfjs-dist": "4.2.67",
     "pdf-to-img": "^4.0.0",
+    "pdfjs-dist": "4.2.67",
     "xml2js": "^0.6.2",
     "zod": "^3.23.0"
   },
@@ -78,6 +79,7 @@
     "cds-watch": "cds watch --open",
     "watch-hybrid": "cds watch --profile hybrid",
     "watch-configcountry": "cds watch --open configcountry/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-knowledgebase": "cds watch --open knowledgebase/index.html?sap-ui-xx-viewCache=false --livereload false",
     "watch-usercountries": "cds watch --open usercountries/index.html?sap-ui-xx-viewCache=false --livereload false",
     "undeploy": "cf undeploy AP_Invoice --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rm -rf resources mta_archives && mbt build --mtar archive",
@@ -88,7 +90,8 @@
     "lint:ui5-configcountry": "cd app/configcountry && ui5lint",
     "lint:ui5-conversion": "cd app/conversionfunctions && ui5lint",
     "lint:ui5-usercountries": "cd app/usercountries && ui5lint",
-    "lint:ui5": "npm run lint:ui5-extraction && npm run lint:ui5-configcountry && npm run lint:ui5-conversion && npm run lint:ui5-usercountries",
+    "lint:ui5-knowledgebase": "cd app/knowledgebase && ui5lint",
+    "lint:ui5": "npm run lint:ui5-extraction && npm run lint:ui5-configcountry && npm run lint:ui5-conversion && npm run lint:ui5-usercountries && npm run lint:ui5-knowledgebase",
     "lint": "npm run lint:cds && npm run lint:ui5"
   },
   "private": true,
@@ -109,16 +112,23 @@
       "enabled": true,
       "model": "gemini-2.5-flash",
       "temperature": 0.3,
-      "maxOutputTokens": 512,
+      "maxOutputTokens": 1024,
       "timeoutMs": 30000,
       "historyLength": 8,
       "historyStore": "db",
       "historyTtlMinutes": 720,
       "tools": {
-        "enabled": false,
+        "enabled": true,
         "disabled": [],
         "maxIterations": 6
       }
+    },
+    "knowledgeBase": {
+      "embeddingModel": "SAP_NEB.20240715",
+      "chunkSize": 1000,
+      "chunkOverlap": 150,
+      "topK": 5,
+      "maxFileSizeMb": 20
     },
     "requires": {
       "AI_Core": {

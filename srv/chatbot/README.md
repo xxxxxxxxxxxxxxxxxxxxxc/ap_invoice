@@ -62,7 +62,7 @@ Blocco `cds.chatbot` in `package.json`, sovrascrivibile da variabili d'ambiente
 | `historyStore` | `CHATBOT_HISTORY_STORE` | `db` | `db` o `memory` |
 | `historyTtlMinutes` | `CHATBOT_HISTORY_TTL_MINUTES` | `720` | dopo tanta inattività la conversazione riparte da zero |
 | `systemPrompt` | `CHATBOT_SYSTEM_PROMPT` | - | sostituisce integralmente il prompt generato |
-| `tools.enabled` | `CHATBOT_TOOLS_ENABLED` | `false` | vedi sotto |
+| `tools.enabled` | `CHATBOT_TOOLS_ENABLED` | `true` | vedi sotto |
 | `tools.disabled` | `CHATBOT_TOOLS_DISABLED` | `[]` | nomi da escludere, anche a tool attivi |
 | `tools.maxIterations` | `CHATBOT_TOOLS_MAX_ITERATIONS` | `6` | giri massimi del loop modello/tool |
 
@@ -71,15 +71,31 @@ sovrascrivibili con `CHATBOT_AI_DESTINATION` e `CHATBOT_AI_RESOURCE_GROUP`.
 
 ## Tool
 
-L'infrastruttura è pronta ma **disattivata**: con `tools.enabled: false` il modello non
-riceve alcun tool e la chat è puramente conversazionale. Per attivarla basta mettere
-`true` nel blocco `cds.chatbot.tools` oppure `CHATBOT_TOOLS_ENABLED=true`.
+I tool sono **attivi** (`tools.enabled: true` in `package.json`). Con `false` (o
+`CHATBOT_TOOLS_ENABLED=false`) il modello non riceve alcun tool e la chat è puramente
+conversazionale.
 
-Sono già registrati due tool di esempio, entrambi in sola lettura:
+Tool registrati, tutti in sola lettura:
 
 - `getCurrentDateTime` - data e ora del server, per le domande con date relative;
 - `searchInvoiceDocuments` - ricerca sui documenti caricati (nome file, numero fattura,
-  fornitore, company code, stato) con un massimo di 20 risultati.
+  fornitore, company code, stato) con un massimo di 20 risultati;
+- `searchKnowledgeBase` - ricerca semantica sulla knowledge base (vedi sotto).
+
+### Knowledge base
+
+I documenti DOCX/PDF/MD caricati dall'app `app/knowledgebase` finiscono in
+`db.KnowledgeDocuments`; `srv/lib/KnowledgeBaseService.js` ne estrae il testo, lo divide
+in chunk (`srv/lib/TextChunker.js`) e calcola gli embedding **dentro HANA Cloud** con
+`VECTOR_EMBEDDING(..., 'DOCUMENT', 'SAP_NEB.20240715')`, salvandoli in
+`db.KnowledgeChunks.embedding` (`REAL_VECTOR(768)`). Il tool `searchKnowledgeBase`
+calcola l'embedding della domanda (`'QUERY'`) e restituisce i chunk più simili
+(`COSINE_SIMILARITY`) con il nome del file sorgente.
+
+Configurazione nel blocco `cds.knowledgeBase` (`embeddingModel`, `chunkSize`,
+`chunkOverlap`, `topK`, `maxFileSizeMb`). Prerequisito: la feature *Natural Language
+Processing* deve essere abilitata sull'istanza HANA Cloud. Su SQLite i chunk vengono
+salvati senza embedding e la ricerca non è disponibile: usare il profilo `hybrid`.
 
 Un tool è un descrittore:
 

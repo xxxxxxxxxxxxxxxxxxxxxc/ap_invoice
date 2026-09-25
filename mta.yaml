@@ -47,6 +47,17 @@ modules:
         - npm install
         - npm run build:cf
       supported-platforms: []
+  - name: AP_Invoice-knowledgebase
+    type: html5
+    path: app/knowledgebase
+    build-parameters:
+      _artifactName: knowledgebase.zip
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
   - name: AP_Invoice-db-deployer
     type: hdb
     path: gen/db
@@ -184,6 +195,10 @@ modules:
         - artifacts:
             - usercountries.zip
           name: AP_Invoice-usercountries
+          target-path: resources
+        - artifacts:
+            - knowledgebase.zip
+          name: AP_Invoice-knowledgebase
           target-path: resources
 
 resources:

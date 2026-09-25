@@ -259,6 +259,19 @@ service CatalogService {
     // sessionId and locale are optional: without a sessionId a new conversation is started.
     // documentId is the invoice open in the UI, so the assistant knows what "this invoice" is.
     action   chatbotMessage(message: String, sessionId: String null, locale: String null, documentId: String null)                                            returns ChatbotReply;
+
+    // Knowledge base of the chatbot: read and delete only, documents are created by
+    // uploadKnowledgeDocument. The file content and the chunks are never exposed.
+    @Capabilities: {
+        InsertRestrictions.Insertable: false,
+        UpdateRestrictions.Updatable : false
+    }
+    entity KnowledgeDocuments  as projection on db.KnowledgeDocuments excluding { content, chunks };
+
+    // file is the base64 content of a .pdf, .docx or .md; returns the new document ID.
+    // Chunking and embedding generation run asynchronously: poll KnowledgeDocuments.status.
+    action   uploadKnowledgeDocument(file: LargeString, fileName: String, mimeType: String null)                                                             returns String;
+    action   reprocessKnowledgeDocument(id: UUID)                                                                                                             returns String;
 }
 
 annotate CatalogService with @requires: ['authenticated-user'];

@@ -2,6 +2,7 @@ const cds = require('@sap/cds');
 const { z } = require('zod');
 const { DynamicStructuredTool } = require('@langchain/core/tools');
 const { getChatbotConfig } = require('./ChatbotConfig');
+const KnowledgeBaseService = require('../lib/KnowledgeBaseService');
 
 /**
  * Tool registry of the conversational chatbot.
@@ -120,6 +121,27 @@ const DEFINITIONS = [
                 return 'No document matches these filters.';
             }
             return truncate(JSON.stringify(rows));
+        }
+    },
+    {
+        name: 'searchKnowledgeBase',
+        description:
+            'Semantic search in the knowledge base: the manuals, procedures, policies and other '
+            + 'DOCX/PDF/Markdown documents uploaded by the users. Use it for any question about how things '
+            + 'work, rules, procedures or content that may be written in those documents. Returns '
+            + 'the most relevant text passages with the source file name and a similarity score '
+            + '(0-1, higher is more relevant). Rephrase the user question as a short, self-contained '
+            + 'query. Read-only.',
+        schema: z.object({
+            query: z.string().min(2).describe('Self-contained search query in natural language'),
+            topK: z.number().int().min(1).max(10).optional().describe('Number of passages to return, default 5')
+        }),
+        handler: async (args) => {
+            const results = await KnowledgeBaseService.search(args.query, args.topK);
+            if (!results.length) {
+                return 'The knowledge base contains no document related to this question.';
+            }
+            return truncate(JSON.stringify(results));
         }
     }
 ];

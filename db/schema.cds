@@ -1,6 +1,6 @@
 namespace db;
 
-using {managed} from '@sap/cds/common';
+using {managed, cuid} from '@sap/cds/common';
 
 entity DocumentStatusBtp : managed {
 
@@ -164,4 +164,31 @@ entity ChatMessages : managed {
         role           : String(20)  @title: 'Role'            @Common.Label: 'Role';
         sequence       : Integer     @title: 'Sequence'        @Common.Label: 'Sequence';
         content        : LargeString @title: 'Content'         @Common.Label: 'Content';
+}
+
+
+// Knowledge base of the chatbot.
+// The user uploads DOCX/PDF/MD documents from the knowledgebase app; the text is split
+// into chunks and every chunk gets an embedding computed inside HANA Cloud by the
+// native NLP function VECTOR_EMBEDDING (see srv/lib/KnowledgeBaseService.js). The
+// chatbot tool searchKnowledgeBase retrieves the most similar chunks.
+entity KnowledgeDocuments : cuid, managed {
+    fileName     : String(255) @title: 'Nome file'     @Common.Label: 'Nome file';
+    mimeType     : String(100) @title: 'Tipo file'     @Common.Label: 'Tipo file';
+    fileSize     : Integer     @title: 'Dimensione'    @Common.Label: 'Dimensione';
+    content      : LargeBinary @title: 'Contenuto'     @Common.Label: 'Contenuto';
+    // Uploaded | Processing | Ready | Error
+    status       : String(20) default 'Uploaded' @title: 'Stato' @Common.Label: 'Stato';
+    errorMessage : LargeString @title: 'Errore'        @Common.Label: 'Errore';
+    chunkCount   : Integer default 0 @title: 'Chunk'   @Common.Label: 'Chunk';
+    chunks       : Composition of many KnowledgeChunks on chunks.document = $self;
+}
+
+entity KnowledgeChunks : cuid {
+    document   : Association to KnowledgeDocuments;
+    chunkIndex : Integer;
+    // NVARCHAR, not NCLOB: it is the input of VECTOR_EMBEDDING
+    content    : String(5000);
+    // REAL_VECTOR(768) on HANA, the size of the SAP_NEB.20240715 embedding model
+    embedding  : Vector(768);
 }

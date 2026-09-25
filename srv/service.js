@@ -10,6 +10,7 @@ const SearchHelpHandler = require('./handlers/SearchHelpHandler');
 const XmlHandler = require('./handlers/XmlHandler');
 const ZipHandler = require('./handlers/ZipHandler');
 const ChatbotHandler = require('./handlers/ChatbotHandler');
+const KnowledgeBaseHandler = require('./handlers/KnowledgeBaseHandler');
 
 module.exports = cds.service.impl(async function (srv) {
   let gtwService, mailService;
@@ -179,6 +180,20 @@ module.exports = cds.service.impl(async function (srv) {
 
   this.on("chatbotMessage", async (req) => {
        return await ChatbotHandler.chatbotMessage(req, this.entities);
+  });
+
+  // --- KNOWLEDGE BASE HANDLERS ---
+
+  this.on("uploadKnowledgeDocument", async (req) => {
+       return await KnowledgeBaseHandler.uploadKnowledgeDocument(req);
+  });
+
+  this.on("reprocessKnowledgeDocument", async (req) => {
+       return await KnowledgeBaseHandler.reprocessKnowledgeDocument(req);
+  });
+
+  this.before("DELETE", "KnowledgeDocuments", async (req) => {
+       await KnowledgeBaseHandler.beforeDeleteKnowledgeDocument(req);
   });
 
   this.on("getUserAllowedCountries", async (req) => {
